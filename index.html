@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>그럴 땐 어떻게</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <div class="hud-top">
+      <ol id="steps" class="steps" aria-label="문제 해결 단계"></ol>
+      <div class="hud-btns">
+        <button type="button" id="cards-btn" class="pill">알게 된 것 <b id="cards-count">0</b></button>
+        <button type="button" id="home-btn" class="pill ghost" aria-label="처음 화면으로">처음</button>
+      </div>
+    </div>
+    <dl class="gauges">
+      <div class="g"><dt>시각</dt><dd id="g-clock" class="num">22:00</dd></div>
+      <div class="g"><dt>가진 돈</dt><dd id="g-money" class="num">3,000원</dd></div>
+      <div class="g bar"><dt>도윤이 컨디션</dt><dd><span id="g-cond" class="meter good" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55"></span></dd></div>
+      <div class="g bar"><dt>내 마음 (걱정)</dt><dd><span id="g-worry" class="meter worry" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></span></dd></div>
+    </dl>
+  </header>
+
+  <main class="play">
+    <section id="stage" aria-live="off">
+      <div id="stage-art"></div>
+      <div id="phone" hidden>
+        <div class="phone-bar"><span id="phone-title"></span></div>
+        <div id="phone-log"></div>
+      </div>
+      <span id="age-chip" class="age-chip"></span>
+    </section>
+
+    <section id="dialog" aria-live="polite">
+      <div id="speaker" class="speaker"></div>
+      <p id="line"></p>
+      <button type="button" id="next" class="next" aria-label="다음 대사">다음 ▾</button>
+    </section>
+
+    <p id="hint" class="hint" hidden></p>
+    <div id="choices" class="choices" hidden></div>
+  </main>
+</div>
+
+<!-- 처음 화면 -->
+<section id="title" class="overlay title" aria-labelledby="game-name">
+  <div class="title-card">
+    <div id="title-art" class="title-art"></div>
+    <div class="title-body">
+      <p class="eyebrow">문제 해결 이야기 게임</p>
+      <h1 id="game-name">그럴 땐 어떻게?</h1>
+      <p class="lede">외워서 맞히는 정답은 없어요. 살피고, 알아보고, 물어보고, 해 보면서 나만의 길을 찾는 게임이에요.</p>
+      <div class="episode">
+        <span class="ep-no">에피소드 1</span>
+        <h2 id="ep-title"></h2>
+        <p id="ep-blurb"></p>
+        <p id="title-count" class="count"></p>
+      </div>
+      <p class="pick">몇 학년이에요?</p>
+      <div class="ages">
+        <button type="button" id="age-low" data-age="low"><b>초등 1~3학년</b><span>힌트를 많이 줘요</span></button>
+        <button type="button" id="age-mid" data-age="mid"><b>초등 4~6학년</b><span>검색하고 비교해요</span></button>
+        <button type="button" id="age-teen" data-age="teen"><b>중학생</b><span>힌트 없이, 더 많은 선택</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 알게 된 것 -->
+<section id="cards" class="overlay drawer" hidden aria-labelledby="cards-h">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="cards-h">알게 된 것</h2>
+      <button type="button" id="cards-close" class="pill ghost">닫기</button>
+    </div>
+    <ul id="cards-list" class="card-list"></ul>
+  </div>
+</section>
+
+<!-- 엔딩과 돌아보기 -->
+<section id="ending" class="overlay ending" hidden aria-labelledby="end-title">
+  <div class="sheet wide">
+    <p class="eyebrow">엔딩 · 돌아보기</p>
+    <h2 id="end-title"></h2>
+    <p id="end-summary" class="summary"></p>
+    <p id="end-stats" class="stats num"></p>
+    <h3>이번에 쓴 힘</h3>
+    <ul id="end-powers" class="powers"></ul>
+    <div id="end-missed-wrap"><h3>이런 방법도 있었어요</h3><ul id="end-missed" class="missed"></ul></div>
+    <h3>같이 이야기해 봐요</h3>
+    <p class="talk-note">정답은 없어요. 부모님, 선생님, 친구와 생각을 나눠 보세요.</p>
+    <ul id="end-q" class="questions"></ul>
+    <p id="end-count" class="count"></p>
+    <div class="end-btns">
+      <button type="button" id="end-retry" class="primary">다른 길로 다시 해 보기</button>
+      <button type="button" id="end-home" class="pill ghost">처음 화면</button>
+    </div>
+  </div>
+</section>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="js/art.js"></script>
+<script src="scenarios/fever-night.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>

@@ -12,6 +12,7 @@
 
 - 그림 규격, 만드는 순서, 이미지 생성 문장: [docs/ART_PIPELINE.md](docs/ART_PIPELINE.md)
 - 나이별 이야기 지도: [docs/STORY_MAP.md](docs/STORY_MAP.md)
+- 인물·표정·배경별 이미지 생성 문장 (복사 버튼): `tools/prompts.html`
 - 새 그림을 끌어다 놓고 합성 확인: `tools/compose.html`
 
 ## 구조
@@ -24,6 +25,7 @@ js/art.js                임시 그림 (배경, 배경 차분, 캐릭터 표정)
 js/engine.js             이야기 엔진: 레이어 무대, 대본 지시어, 게이지, 단서 카드, 엔딩 회고
 scenarios/fever-night.js 에피소드 1
 scenarios/catalog.js     처음 화면의 이야기 지도
+tools/prompts.html       이미지 생성 문장 모음 (데이터: tools/prompts-data.js)
 tools/compose.html       장면 합성 미리보기
 docs/                    설계 문서
 ```

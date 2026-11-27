@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 생성 문장 모음</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  body { padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .page { max-width: 860px; margin: 0 auto; display: grid; gap: 22px; }
+  header h1 { font-size: clamp(28px, 5vw, 40px); }
+  header p { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .how li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+  .how li::before { content: counter(s) "단계"; display: block; font-family: var(--display); color: var(--lamp); font-size: 14px; }
+  .styl { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; }
+  .styl h2 { font-size: 18px; }
+  .styl p { margin: 0; font-size: 14px; color: var(--muted); }
+  textarea { width: 100%; min-height: 84px; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); resize: vertical; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .bar { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+  .bar nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bar a { text-decoration: none; color: var(--ink); }
+  .prog { font-family: var(--display); font-variant-numeric: tabular-nums; }
+  section > h2 { font-size: 24px; margin-bottom: 4px; }
+  section > p.sub { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+  .group { display: grid; gap: 10px; margin-bottom: 22px; }
+  .group h3 { font-size: 19px; display: flex; gap: 8px; align-items: baseline; }
+  .group h3 small { font-family: var(--body); font-size: 13px; color: var(--muted); }
+  .item { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+  .item.done { border-color: var(--good); }
+  .item-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .item-head b { font-family: var(--display); font-weight: 400; font-size: 17px; }
+  .item-head .ko { display: block; font-size: 14px; color: var(--muted); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+  .chip.ref { background: var(--lamp-soft); color: var(--ink); font-family: var(--body); border-color: transparent; }
+  .chip.kind { background: var(--explore-soft); color: var(--explore); font-family: var(--body); border-color: transparent; }
+  pre { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--panel-2); font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow-y: auto; }
+  .copy { border: 0; border-radius: 10px; padding: 8px 14px; background: var(--ink); color: var(--bg); font-family: var(--display); font-size: 15px; }
+  .copy.ok { background: var(--good); color: #fff; }
+  .check { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--good); }
+  .tips { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+  .tips ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+  .tips h2 { font-size: 18px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <p class="eyebrow">만드는 사람용 · 에피소드 1</p>
+    <h1>이미지 생성 문장 모음</h1>
+    <p>Gemini 같은 이미지 생성 AI에 그대로 붙여 넣는 문장입니다. 번호 순서대로 만들면 같은 얼굴, 같은 그림체가 유지돼요.</p>
+  </header>
+
+  <ol class="how">
+    <li><b>기준 그림 먼저.</b> 인물마다 "기준" 문장으로 여러 장 뽑고 가장 좋은 한 장을 고릅니다. 이 그림이 그 인물의 얼굴이 됩니다.</li>
+    <li><b>표정은 고쳐 그리기.</b> 기준 그림을 참고 이미지로 넣고 표정 문장을 붙입니다. 새로 뽑지 말고 항상 기준 그림에서 출발하세요.</li>
+    <li><b>정리와 등록.</b> 흰 배경을 지워 투명하게 만들고, 적힌 파일 이름으로 저장한 뒤 <a href="compose.html">합성 미리보기</a>로 확인합니다.</li>
+  </ol>
+
+  <div class="styl">
+    <h2>공통 그림체</h2>
+    <p>모든 문장에 자동으로 들어갑니다. 여기서 고치면 아래 문장이 전부 함께 바뀌어요(이 브라우저에만 저장).</p>
+    <textarea id="style" aria-label="공통 그림체 문장"></textarea>
+    <div class="row"><button type="button" class="pill" id="style-reset">처음 문장으로 되돌리기</button></div>
+  </div>
+
+  <div class="bar">
+    <nav aria-label="바로 가기">
+      <a class="pill" href="#chars">캐릭터</a>
+      <a class="pill" href="#bgs">배경</a>
+      <a class="pill" href="#cgs">이벤트 CG</a>
+      <a class="pill ghost" href="../index.html">게임으로</a>
+    </nav>
+    <span class="prog" id="prog">완성 0 / 0</span>
+  </div>
+
+  <section id="chars">
+    <h2>캐릭터</h2>
+    <p class="sub">1000×1800 투명 배경으로 정리합니다. 모든 인물을 같은 축척으로 맞춰야 키 차이가 그대로 보여요.</p>
+    <div id="char-list"></div>
+  </section>
+
+  <section id="bgs">
+    <h2>배경</h2>
+    <p class="sub">1920×1080. 같은 방의 시간·상태만 다른 그림은 먼저 만든 그림을 참고 이미지로 넣고 고쳐 그립니다.</p>
+    <div class="group" id="bg-list"></div>
+  </section>
+
+  <section id="cgs">
+    <h2>이벤트 CG</h2>
+    <p class="sub">이야기의 결정적인 순간 한 장. 있으면 좋고, 없어도 게임은 돌아갑니다.</p>
+    <div class="group" id="cg-list"></div>
+  </section>
+
+  <div class="tips">
+    <h2>잘 안 될 때</h2>
+    <ul>
+      <li>얼굴이 자꾸 달라지면: 표정 그림에서 다시 표정을 만들지 말고, 항상 <b>기준 그림</b>을 참고 이미지로 넣으세요.</li>
+      <li>옷 색이 바뀌면: 문장 끝에 "Do not change the hoodie color." 처럼 바뀐 부분을 콕 집어 한 줄 더 붙이세요.</li>
+      <li>손가락이 이상하면: 그 부분만 고쳐 그리기로 다시 요청하거나, 손이 주머니나 옷자락에 가려진 자세로 바꾸세요.</li>
+      <li>배경이 흰색이 아니면: "solid plain white background" 문장을 다시 붙이고, 배경 제거 도구로 지운 뒤 머리카락 가장자리를 확인하세요.</li>
+      <li>아이가 나오는 그림은 옷차림과 자세를 사람이 꼭 한 번 더 봅니다.</li>
+    </ul>
+  </div>
+</div>
+
+<script src="prompts-data.js"></script>
+<script>
+(function () {
+  const P = window.PROMPTS;
+  const $ = s => document.querySelector(s);
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  let style = ls.get('prompts.style', P.style);
+  const done = new Set(ls.get('prompts.done', []));
+  const items = [];
+  let n = 0;
+
+  function add(container, it) {
+    it.no = ++n;
+    items.push(it);
+    const el = document.createElement('article');
+    el.className = 'item';
+    el.id = 'p-' + it.key;
+    el.innerHTML = `
+      <div class="item-head">
+        <div><b>${it.no}. ${it.title}</b><span class="ko">${it.ko}</span></div>
+        <label class="check"><input type="checkbox" id="done-${it.key}"> 완성</label>
+      </div>
+      <div class="chips">
+        <span class="chip kind">${it.kind}</span>
+        ${it.ref ? `<span class="chip ref">참고 이미지: ${it.ref}</span>` : ''}
+        <span class="chip">${it.file}</span>
+      </div>
+      <pre></pre>
+      <div class="row"><button type="button" class="copy" id="copy-${it.key}">문장 복사</button></div>`;
+    container.appendChild(el);
+    it.el = el;
+    const cb = el.querySelector('input');
+    cb.checked = done.has(it.key);
+    el.classList.toggle('done', cb.checked);
+    cb.addEventListener('change', () => {
+      cb.checked ? done.add(it.key) : done.delete(it.key);
+      el.classList.toggle('done', cb.checked);
+      ls.set('prompts.done', [...done]); prog();
+    });
+    el.querySelector('.copy').addEventListener('click', e => copy(e.currentTarget, el.querySelector('pre')));
+  }
+
+  function copy(btn, pre) {
+    const ok = () => { btn.textContent = '복사했어요'; btn.classList.add('ok'); setTimeout(() => { btn.textContent = '문장 복사'; btn.classList.remove('ok'); }, 1600); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = '선택했어요. 복사하세요'; };
+    try { navigator.clipboard.writeText(pre.textContent).then(ok, fallback); } catch (e) { fallback(); }
+  }
+
+  /* 캐릭터 */
+  const charList = $('#char-list');
+  P.characters.forEach(c => {
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.innerHTML = `<h3>${c.name} <small>${c.id} · 표정 ${c.faces.length + 1}개</small></h3>`;
+    charList.appendChild(g);
+    add(g, { key: `c-${c.id}-${c.base.face}`, title: `${c.name.split(' ')[0]} · 기준 그림`, ko: c.base.ko, kind: '새로 그리기',
+      file: `assets/chars/${c.id}/${c.base.face}.webp`,
+      build: () => `${style}\n\n${P.spriteFrame}\n\nCharacter: ${c.desc}.\nExpression and pose: ${c.base.text}.` });
+    c.faces.forEach(f => add(g, { key: `c-${c.id}-${f.face}`, title: `${c.name.split(' ')[0]} · ${f.ko.split(':')[0]}`, ko: f.ko, kind: '고쳐 그리기',
+      ref: `${c.name.split(' ')[0]} 기준 그림 (${c.base.face}.webp)`,
+      file: `assets/chars/${c.id}/${f.face}.webp`,
+      build: () => `${P.editLock}\n${f.text}.\n\nCharacter (for reference): ${c.desc}.\nStyle: ${style}` }));
+  });
+
+  /* 배경 */
+  P.backgrounds.forEach(b => add($('#bg-list'), {
+    key: `b-${b.id}`, title: b.id, ko: b.ko,
+    kind: b.from ? '고쳐 그리기' : '새로 그리기',
+    ref: b.from ? `${b.from}.webp` : b.ref,
+    file: `assets/bg/${b.id}.webp`,
+    build: () => b.from ? `${P.bgEditLock}\n${b.edit}.\n\nStyle: ${style}` : `${style}\n\n${P.bgFrame}\n\nScene: ${b.text}.`
+  }));
+
+  /* CG */
+  P.cgs.forEach(c => add($('#cg-list'), {
+    key: `g-${c.id}`, title: c.id, ko: c.ko, kind: '새로 그리기', ref: c.ref,
+    file: `assets/cg/${c.id}.webp`,
+    build: () => `${style}\n\nScene: ${c.text}.`
+  }));
+
+  function render() { items.forEach(it => { it.el.querySelector('pre').textContent = it.build(); }); }
+  function prog() { $('#prog').textContent = `완성 ${items.filter(i => done.has(i.key)).length} / ${items.length}`; }
+
+  const ta = $('#style');
+  ta.value = style;
+  ta.addEventListener('input', () => { style = ta.value.trim() || P.style; ls.set('prompts.style', style); render(); });
+  $('#style-reset').addEventListener('click', () => { style = P.style; ta.value = style; ls.set('prompts.style', style); render(); });
+
+  render(); prog();
+})();
+</script>
+</body>
+</html>

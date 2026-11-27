@@ -73,31 +73,48 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
 .meter.worry::after { background: var(--explore); }
 .meter.worry[data-level="high"]::after { background: var(--warn); }
 
-/* 무대 */
-.play { display: flex; flex-direction: column; gap: 10px; }
-#stage { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 52vh; background: var(--stage); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
-#stage-art, #stage-art svg { width: 100%; height: 100%; display: block; }
+/* 무대: 비주얼 노벨 레이어 (배경 → 캐릭터 → CG → 휴대폰) */
+#screen { position: relative; }
+#stage { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 64vh; background: var(--stage); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+.layer { position: absolute; inset: 0; }
+#layer-bg img, .stage-like img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .45s ease; }
+#layer-bg img.in, .stage-like img.bg.in { opacity: 1; }
+.sprite { position: absolute; bottom: -6%; height: 100%; aspect-ratio: 200 / 360; transform: translateX(-50%) translateY(3%); opacity: 0; transition: opacity .3s ease, transform .3s ease, left .4s ease, filter .25s ease; pointer-events: none; }
+.sprite.in { opacity: 1; transform: translateX(-50%); }
+.sprite img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; display: block; max-width: none; }
+.sprite.dim { filter: brightness(.72) saturate(.85); }
+#layer-cg { opacity: 0; transition: opacity .6s ease; pointer-events: none; background: #000; }
+#layer-cg.in { opacity: 1; }
+#layer-cg img { width: 100%; height: 100%; object-fit: cover; }
+#stage.shake { animation: shake .4s ease; }
+@keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
 .age-chip { position: absolute; left: 10px; top: 10px; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: rgb(0 0 0 / .45); color: #fff; }
-#phone { position: absolute; right: 4%; top: 6%; bottom: 6%; width: min(40%, 260px); background: #11162B; border: 6px solid #2B3354; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; color: #E9EDF7; box-shadow: 0 10px 30px rgb(0 0 0 / .4); }
+#phone { position: absolute; right: 4%; top: 5%; bottom: 5%; width: min(40%, 260px); background: #11162B; border: 6px solid #2B3354; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden; color: #E9EDF7; box-shadow: 0 10px 30px rgb(0 0 0 / .4); }
 .phone-bar { padding: 8px 12px; font-family: var(--display); font-size: 15px; background: #1E2647; display: flex; align-items: center; gap: 6px; }
 #phone[data-app="call"] .phone-bar::before { content: "📞"; }
 #phone[data-app="ai"] .phone-bar::before { content: "✨"; }
 #phone[data-app="search"] .phone-bar::before { content: "🔍"; }
-#phone-log { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: clamp(11px, 1.6vw, 14px); line-height: 1.45; }
+#phone-log { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; font-size: clamp(11px, 1.5vw, 14px); line-height: 1.45; }
 .bubble { max-width: 88%; padding: 6px 9px; border-radius: 12px; }
 .bubble.theirs { align-self: flex-start; background: #2B3560; border-bottom-left-radius: 4px; }
 .bubble.mine { align-self: flex-end; background: #F5B54A; color: #1B2340; border-bottom-right-radius: 4px; }
 
-/* 대사창 */
-#dialog { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 12px; min-height: 108px; box-shadow: var(--shadow); cursor: pointer; }
-.speaker { display: inline-block; font-family: var(--display); font-size: 16px; padding: 1px 12px; border-radius: 999px; background: var(--lamp-soft); color: var(--ink); margin-bottom: 6px; }
+/* 대사창: 넓은 화면에서는 그림 위에 겹치는 노벨 게임 방식, 휴대폰에서는 그림 아래 */
+#dialog { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 14px; min-height: 108px; box-shadow: var(--shadow); cursor: pointer; margin-top: 10px; }
+.speaker { position: absolute; top: -14px; left: 14px; font-family: var(--display); font-size: 16px; padding: 2px 14px; border-radius: 8px; background: var(--ink); color: var(--bg); }
 .speaker[hidden] { display: none !important; }
 #dialog[data-who="narr"] #line { color: var(--muted); }
-#dialog[data-who="ai"] .speaker { background: var(--explore-soft); }
+#dialog[data-who="ai"] .speaker { background: var(--explore); color: #fff; }
 #line { margin: 0; font-size: 18px; line-height: 1.65; min-height: 3.3em; max-width: 62ch; }
-.next { position: absolute; right: 10px; bottom: 8px; border: 0; background: transparent; color: var(--muted); font-size: 14px; padding: 4px 8px; }
+.next { position: absolute; right: 12px; bottom: 8px; border: 0; background: transparent; color: var(--lamp); font-size: 14px; padding: 4px 8px; }
 @media (prefers-reduced-motion: no-preference) { .next { animation: bob 1.2s ease-in-out infinite; } }
 @keyframes bob { 50% { transform: translateY(3px); } }
+@media (min-width: 700px) {
+  #stage { max-height: none; }
+  #dialog { position: absolute; left: 2.5%; right: 2.5%; bottom: 3.5%; margin: 0; min-height: 27%; padding: 22px 26px 16px; border-radius: 14px; border-color: color-mix(in srgb, var(--line) 60%, transparent); background: color-mix(in srgb, var(--panel) 86%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .speaker { left: 22px; }
+  #phone { bottom: 34%; }
+}
 
 /* 선택지 */
 .hint { margin: 0; font-size: 15px; color: var(--muted); padding: 0 4px; }
@@ -125,9 +142,9 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
 
 /* 처음 화면 */
 .title { background: var(--bg); }
-.title-card { max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: center; min-height: 100%; }
-.title-art { border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 10; background: var(--stage); box-shadow: var(--shadow); }
-.title-art svg { width: 100%; height: 100%; display: block; }
+.title-card { max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start; padding-top: 4vh; }
+@media (min-width: 641px) { .title-art.stage-like { position: sticky; top: 16px; } }
+.title-art { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 10; background: var(--stage); box-shadow: var(--shadow); }
 .title-body { min-width: 0; }
 .title h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: -.01em; }
 .lede { font-size: 17px; color: var(--muted); max-width: 40ch; margin: 10px 0 16px; }
@@ -142,6 +159,20 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
 .ages button:hover { border-color: var(--lamp); }
 .ages b { font-family: var(--display); font-weight: 400; font-size: 18px; }
 .ages span { font-size: 14px; color: var(--muted); }
+
+/* 이야기 지도 */
+.roadmap { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.roadmap summary { cursor: pointer; font-family: var(--display); font-size: 16px; }
+#roadmap { display: grid; gap: 12px; margin-top: 10px; }
+#roadmap ul { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); column-gap: 16px; }
+#roadmap h3 { font-size: 15px; margin-bottom: 4px; }
+#roadmap ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+#roadmap li { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); }
+#roadmap li span { flex: none; font-size: 12px; }
+#roadmap li.ready { color: var(--ink); }
+#roadmap li.ready span { color: var(--explore); }
+
+.maker a { color: var(--muted); }
 
 /* 카드 서랍 */
 .drawer { background: rgb(10 14 30 / .55); display: flex; align-items: flex-end; }
@@ -183,5 +214,6 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
   .title-card { grid-template-columns: 1fr; gap: 14px; }
   #line { font-size: 17px; }
   #phone { width: 52%; border-width: 4px; border-radius: 16px; }
+  .sprite { bottom: -10%; }
   .steps li { font-size: 12px; padding: 2px 8px; }
 }

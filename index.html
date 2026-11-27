@@ -28,20 +28,24 @@
   </header>
 
   <main class="play">
-    <section id="stage" aria-live="off">
-      <div id="stage-art"></div>
-      <div id="phone" hidden>
-        <div class="phone-bar"><span id="phone-title"></span></div>
-        <div id="phone-log"></div>
-      </div>
-      <span id="age-chip" class="age-chip"></span>
-    </section>
+    <div id="screen">
+      <section id="stage" aria-live="off">
+        <div id="layer-bg" class="layer"></div>
+        <div id="layer-chars" class="layer"></div>
+        <div id="layer-cg" class="layer"><img alt="이벤트 그림"></div>
+        <div id="phone" hidden>
+          <div class="phone-bar"><span id="phone-title"></span></div>
+          <div id="phone-log"></div>
+        </div>
+        <span id="age-chip" class="age-chip"></span>
+      </section>
 
-    <section id="dialog" aria-live="polite">
-      <div id="speaker" class="speaker"></div>
-      <p id="line"></p>
-      <button type="button" id="next" class="next" aria-label="다음 대사">다음 ▾</button>
-    </section>
+      <section id="dialog" aria-live="polite">
+        <div id="speaker" class="speaker"></div>
+        <p id="line"></p>
+        <button type="button" id="next" class="next" aria-label="다음 대사">▼</button>
+      </section>
+    </div>
 
     <p id="hint" class="hint" hidden></p>
     <div id="choices" class="choices" hidden></div>
@@ -51,7 +55,7 @@
 <!-- 처음 화면 -->
 <section id="title" class="overlay title" aria-labelledby="game-name">
   <div class="title-card">
-    <div id="title-art" class="title-art"></div>
+    <div id="title-art" class="title-art stage-like"></div>
     <div class="title-body">
       <p class="eyebrow">문제 해결 이야기 게임</p>
       <h1 id="game-name">그럴 땐 어떻게?</h1>
@@ -68,6 +72,11 @@
         <button type="button" id="age-mid" data-age="mid"><b>초등 4~6학년</b><span>검색하고 비교해요</span></button>
         <button type="button" id="age-teen" data-age="teen"><b>중학생</b><span>힌트 없이, 더 많은 선택</span></button>
       </div>
+      <details class="roadmap">
+        <summary>이야기 지도: 나이별로 준비 중인 이야기</summary>
+        <div id="roadmap"></div>
+      </details>
+      <p class="count maker"><a href="tools/compose.html">만드는 사람용: 장면 합성 미리보기</a></p>
     </div>
   </div>
 </section>
@@ -106,8 +115,10 @@
 
 <div id="toast" class="toast" role="status" hidden></div>
 
+<script src="assets/manifest.js"></script>
 <script src="js/art.js"></script>
 <script src="scenarios/fever-night.js"></script>
+<script src="scenarios/catalog.js"></script>
 <script src="js/engine.js"></script>
 </body>
 </html>

@@ -6,15 +6,26 @@
 - 나이 선택: 초등 1~3학년 / 초등 4~6학년 / 중학생
 - 실행: `index.html`을 브라우저로 열면 됩니다. 빌드나 설치가 필요 없습니다.
 
+## 화면 구조: 비주얼 노벨 레이어
+
+배경 → 캐릭터(표정 차분) → 이벤트 CG → 휴대폰 화면 → 대사창을 따로 겹칩니다. 그림 몇 장으로 많은 장면을 만들 수 있고, 진짜 일러스트는 `assets/manifest.js`에 경로만 적으면 바로 들어갑니다. 아직 없는 그림은 코드로 그린 임시 그림이 채웁니다.
+
+- 그림 규격, 만드는 순서, 이미지 생성 문장: [docs/ART_PIPELINE.md](docs/ART_PIPELINE.md)
+- 나이별 이야기 지도: [docs/STORY_MAP.md](docs/STORY_MAP.md)
+- 새 그림을 끌어다 놓고 합성 확인: `tools/compose.html`
+
 ## 구조
 
 ```
-index.html              화면 뼈대
-css/style.css           디자인 (밝은/어두운 테마)
-js/art.js               배경·인물 그림 (SVG). ASSETS에 이미지 경로를 넣으면 교체됨
-js/engine.js            이야기 엔진: 장면, 대사, 선택지, 게이지, 단서 카드, 엔딩 회고
-scenarios/fever-night.js 에피소드 1 데이터
-docs/DESIGN.md          설계 방향과 에셋(Blender, Three.js, 이미지 생성 AI) 비교
+index.html               게임 화면
+css/style.css            디자인 (밝은/어두운 테마)
+assets/manifest.js       진짜 일러스트 등록부
+js/art.js                임시 그림 (배경, 배경 차분, 캐릭터 표정)
+js/engine.js             이야기 엔진: 레이어 무대, 대본 지시어, 게이지, 단서 카드, 엔딩 회고
+scenarios/fever-night.js 에피소드 1
+scenarios/catalog.js     처음 화면의 이야기 지도
+tools/compose.html       장면 합성 미리보기
+docs/                    설계 문서
 ```
 
-새 에피소드는 `scenarios/`에 같은 형식의 파일을 추가하면 됩니다. 형식 설명은 `scenarios/fever-night.js` 맨 위에 있습니다.
+새 에피소드는 `scenarios/`에 같은 형식의 파일을 추가하면 됩니다. 대본 형식과 지시어(`@bg`, `@show`, `@face`, `@cg` …)는 `docs/ART_PIPELINE.md` 6장에 있습니다.

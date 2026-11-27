@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>장면 합성 미리보기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  body { padding: 16px; }
+  .wrap { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 12px; align-content: start; }
+  .panel h2 { font-size: 18px; }
+  label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  select { width: 100%; min-width: 0; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+  .slot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; border: 1px dashed var(--line); border-radius: 10px; }
+  .slot b { grid-column: 1 / -1; font-family: var(--display); font-weight: 400; }
+  .drop { border: 2px dashed var(--line); border-radius: 10px; padding: 12px; text-align: center; font-size: 14px; color: var(--muted); }
+  .drop.over { border-color: var(--lamp); color: var(--ink); }
+  pre { background: var(--panel-2); border-radius: 10px; padding: 10px; font-size: 12px; overflow-x: auto; margin: 0; white-space: pre-wrap; }
+  .note { font-size: 13px; color: var(--muted); margin: 0; }
+  .real { color: var(--good); }
+  @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1 style="font-size:28px;margin-bottom:8px">장면 합성 미리보기</h1>
+    <p class="note">배경과 캐릭터를 골라 게임 화면과 똑같이 겹쳐 봅니다. 새로 만든 그림 파일을 아래 칸에 끌어다 놓으면 바로 그 자리에 들어가요(내 컴퓨터에서만 보이고, 어디에도 올라가지 않아요).</p>
+    <div id="screen" style="margin-top:12px">
+      <section id="stage">
+        <div id="layer-bg" class="layer"></div>
+        <div id="layer-chars" class="layer"></div>
+      </section>
+      <section id="dialog" data-who="me">
+        <div id="speaker" class="speaker">하람</div>
+        <p id="line">대사창이 그림을 얼마나 가리는지 확인해 보세요. 얼굴과 손짓은 위쪽 3분의 2 안에 두는 게 좋아요.</p>
+      </section>
+    </div>
+  </div>
+  <aside class="panel">
+    <h2>배경</h2>
+    <label>배경 id <select id="bg"></select></label>
+    <div class="drop" id="drop-bg">배경 이미지를 여기에 놓기 (1920×1080)</div>
+    <h2>캐릭터</h2>
+    <div id="slots"></div>
+    <h2>manifest.js에 넣을 줄</h2>
+    <pre id="out">// 그림을 놓으면 여기에 등록할 줄이 생겨요</pre>
+  </aside>
+</div>
+<script src="../assets/manifest.js"></script>
+<script src="../js/art.js"></script>
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  const POS = { left: 24, center: 50, right: 76 };
+  const people = Object.keys(ART.faces);
+  const local = { bg: {}, chars: {} }; // 끌어다 놓은 파일
+  const slots = [
+    { id: 'me', face: 'worry', pos: 'left' },
+    { id: 'grandma', face: 'normal', pos: 'right' },
+    { id: '', face: 'normal', pos: 'center' }
+  ];
+  $('#bg').innerHTML = ART.bgs.map(b => `<option value="${b}">${b}${ART.isReal.bg(b) ? ' ✓' : ''}</option>`).join('');
+  $('#bg').value = 'hall';
+
+  $('#slots').innerHTML = slots.map((s, i) => `
+    <div class="slot" data-i="${i}">
+      <b>자리 ${i + 1}</b>
+      <select data-k="id" aria-label="인물"><option value="">(없음)</option>${people.map(p => `<option>${p}</option>`).join('')}</select>
+      <select data-k="face" aria-label="표정"></select>
+      <select data-k="pos" aria-label="자리">${Object.keys(POS).map(p => `<option>${p}</option>`).join('')}</select>
+      <div class="drop" style="grid-column:1/-1" data-drop="${i}">이 인물·표정 그림 놓기 (1000×1800 투명)</div>
+    </div>`).join('');
+
+  function faces(i) {
+    const s = slots[i], sel = document.querySelector(`.slot[data-i="${i}"] [data-k="face"]`);
+    const list = ART.faces[s.id] || ['normal'];
+    if (!list.includes(s.face)) s.face = list[0];
+    sel.innerHTML = list.map(f => `<option${f === s.face ? ' selected' : ''}>${f}</option>`).join('');
+  }
+  document.querySelectorAll('.slot').forEach(el => {
+    const i = +el.dataset.i;
+    el.querySelector('[data-k="id"]').value = slots[i].id;
+    el.querySelector('[data-k="pos"]').value = slots[i].pos;
+    faces(i);
+    el.addEventListener('change', e => { slots[i][e.target.dataset.k] = e.target.value; faces(i); draw(); });
+  });
+  $('#bg').addEventListener('change', draw);
+
+  function draw() {
+    const b = $('#bg').value;
+    $('#layer-bg').innerHTML = `<img class="bg in" alt="" src="${local.bg[b] || ART.bg(b)}">`;
+    $('#layer-chars').innerHTML = slots.filter(s => s.id).map(s =>
+      `<div class="sprite in" style="left:${POS[s.pos]}%"><img alt="" src="${(local.chars[s.id] || {})[s.face] || ART.sprite(s.id, s.face)}"></div>`).join('');
+    const lines = [];
+    Object.keys(local.bg).forEach(k => lines.push(`bg: { ${k}: 'assets/bg/${k}.webp' }`));
+    Object.entries(local.chars).forEach(([id, f]) => Object.keys(f).forEach(face => lines.push(`chars: { ${id}: { ${face}: 'assets/chars/${id}/${face}.webp' } }`)));
+    $('#out').textContent = lines.length ? lines.join('\n') : '// 그림을 놓으면 여기에 등록할 줄이 생겨요';
+  }
+
+  function dropZone(el, onFile) {
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault(); el.classList.remove('over');
+      const f = e.dataTransfer.files[0];
+      if (f && f.type.startsWith('image/')) { onFile(URL.createObjectURL(f)); draw(); }
+    });
+  }
+  dropZone($('#drop-bg'), url => { local.bg[$('#bg').value] = url; });
+  document.querySelectorAll('[data-drop]').forEach(el => dropZone(el, url => {
+    const s = slots[+el.dataset.drop];
+    if (!s.id) return;
+    (local.chars[s.id] = local.chars[s.id] || {})[s.face] = url;
+  }));
+  draw();
+})();
+</script>
+</body>
+</html>

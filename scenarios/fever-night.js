@@ -12,6 +12,9 @@ window.EPISODE = (function () {
   const has = (S, k) => S.cards.has(k);
   // had: 선택지를 고르기 직전에 이미 알고 있던 단서 (선택 효과로 새로 얻은 카드는 제외)
   const had = (S, k) => (S.had || S.cards).has(k);
+  // 배경 차분: 동생이 누운 방. 물수건을 해 주면 차분이 바뀐다
+  const roomBg = S => (has(S, 'care') ? 'room_towel' : 'room_sick');
+  const morningBg = S => (has(S, 'care') ? 'morning_towel' : 'morning_sick');
 
   const cards = {
     fever39:      { t: '체온 39.2℃', d: '"많이 뜨거워요"보다 "39.2도예요"가 훨씬 정확해요. 숫자로 확인하면 어른에게 설명하기 쉬워요.', hint: '열이 몇 도인지 숫자로 확인하기' },
@@ -32,13 +35,15 @@ window.EPISODE = (function () {
 
   const nodes = {
     intro: {
-      bg: 'room', step: 0,
-      cast: [['doyun', 'sick', 'bed', { flush: true }], ['me', 'worry', 'right']],
+      bg: roomBg, step: 0,
+      cast: [['me', 'worry', 'right']],
       lines: [
         ['narr', '밤 10시. 엄마는 공장 야간 근무라서 아침 7시에 오세요.'],
         ['narr', '집에는 나, 하람이와 여덟 살 동생 도윤이 둘뿐이에요.'],
         ['doyun', '…나 머리가 너무 뜨거워. 어지러워.'],
-        ['me', '(이마가 불덩이 같아! 어떡하지?)'],
+        ['@shake'],
+        ['me@surprised', '(이마가 불덩이 같아! 어떡하지?)'],
+        ['@face', 'me', 'worry'],
         ['narr', '내 지갑에 있는 돈은 3,000원뿐이에요.'],
         ['narr', {
           low: '괜찮아요. 하나씩 해 보면 돼요. 정답은 하나가 아니에요.',
@@ -50,9 +55,9 @@ window.EPISODE = (function () {
     },
 
     hub: {
-      bg: 'room',
+      bg: roomBg,
       step: S => (S.cards.size === 0 ? 0 : S.cards.size < 4 ? 1 : 2),
-      cast: S => [['doyun', S.cond >= 70 ? 'smile' : 'sick', 'bed', { flush: S.cond < 70, towel: has(S, 'care') }], ['me', S.worry > 55 ? 'worry' : 'normal', 'right']],
+      cast: S => [['me', S.worry > 55 ? 'worry' : 'normal', 'right']],
       lines: S => {
         const L = [];
         if (S.flags.hubSeen) L.push(['me', `지금은 ${S.clock()}. 이제 뭘 해 볼까?`]);
@@ -88,19 +93,19 @@ window.EPISODE = (function () {
     },
 
     thermo: {
-      bg: 'room', step: 0,
-      cast: [['doyun', 'sick', 'bed', { flush: true }], ['me', 'surprised', 'right']],
+      bg: roomBg, step: 0,
+      cast: [['me', 'surprised', 'right']],
       lines: [
         ['narr', '삑! 체온계에 39.2℃가 떴어요.'],
-        ['me', '39.2도… 숫자로 알고 나니까 오히려 조금 침착해졌어.'],
+        ['me@normal', '39.2도… 숫자로 알고 나니까 오히려 조금 침착해졌어.'],
         ['narr', '보통 38℃가 넘으면 열이 난다고 해요. 정확한 숫자는 누군가에게 상황을 설명할 때 큰 힘이 돼요.', ['mid', 'teen']]
       ],
       next: 'hub'
     },
 
     observe: {
-      bg: 'room', step: 0,
-      cast: [['doyun', 'sick', 'bed', { flush: true }], ['me', 'worry', 'center']],
+      bg: roomBg, step: 0,
+      cast: [['me', 'worry', 'right']],
       lines: [
         ['me', '도윤아, 숨 쉬는 거 힘들어? 내 말 들려?'],
         ['doyun', '응… 들려. 목이 좀 아파.'],
@@ -111,7 +116,7 @@ window.EPISODE = (function () {
     },
 
     callmom: {
-      bg: 'room', step: 1, phone: { app: 'call', title: '엄마' },
+      bg: roomBg, step: 1, phone: { app: 'call', title: '엄마' },
       cast: [['me', 'worry', 'left']],
       lines: [
         ['narr', '뚜르르… 뚜르르…'],
@@ -123,7 +128,7 @@ window.EPISODE = (function () {
     },
 
     momcall: {
-      bg: 'room', step: 1, phone: { app: 'call', title: '엄마' },
+      bg: roomBg, step: 1, phone: { app: 'call', title: '엄마' },
       cast: [['me', 'surprised', 'left']],
       enter: S => {
         S.flags.momcall = true;
@@ -140,13 +145,13 @@ window.EPISODE = (function () {
           ? ['mom', '옆집 1204호 할머니께 엄마가 전화해 둘게. 할머니께 가 보렴.']
           : ['mom', '네 체크카드로 2만 원 보냈어. 꼭 필요한 데 쓰고, 혼자 무리하지는 마.'],
         ['mom', '넌 지금 잘하고 있어. 숨쉬기 힘들어하면 바로 119야. 알았지?'],
-        ['me', '응, 엄마. 걱정 마!']
+        ['me@smile', '응, 엄마. 걱정 마!']
       ],
       next: 'hub'
     },
 
     medbox: {
-      bg: 'room', step: 1,
+      bg: roomBg, step: 1,
       cast: [['me', 'normal', 'center']],
       lines: [
         ['narr', '약 상자 안에는 반창고, 소화제, 그리고 어른용 해열진통제가 있어요.'],
@@ -159,7 +164,7 @@ window.EPISODE = (function () {
     },
 
     askai: {
-      bg: 'room', step: 1, phone: { app: 'ai', title: 'AI 도우미' },
+      bg: roomBg, step: 1, phone: { app: 'ai', title: 'AI 도우미' },
       cast: [['me', 'normal', 'left']],
       lines: S => [
         ['me', has(S, 'fever39') ? '"여덟 살 동생이 열이 39.2도예요. 어떻게 해요?"' : '"동생이 열이 많이 나요. 어떻게 해요?"'],
@@ -172,21 +177,22 @@ window.EPISODE = (function () {
     },
 
     adultmed: {
-      bg: 'room', step: 3,
-      cast: [['me', 'surprised', 'center']],
+      bg: roomBg, step: 3,
+      cast: [['me', 'normal', 'right']],
       lines: S => (S.flags.sawLabelFirst = had(S, 'medicine_label'), [
         S.flags.sawLabelFirst ? ['me', '잠깐, AI는 어른 약 반 알이면 된다고 했는데…'] : ['me', 'AI가 반 알은 괜찮다고 했으니까…'],
         S.flags.sawLabelFirst ? ['narr', '아까 읽은 설명서를 다시 꺼내 봤어요.'] : ['narr', '약을 꺼내려는데, 상자에 붙은 설명서가 눈에 들어왔어요.'],
         ['narr', '"만 12세 미만 어린이는 복용하지 마십시오."'],
-        ['me', '어?! AI는 괜찮다고 했는데, 설명서에는 먹이지 말라고 써 있어!'],
-        ['me', 'AI 말도 틀릴 수 있구나. 약은 설명서랑 약사, 119에 꼭 확인해야겠다.'],
+        ['@shake'],
+        ['me@surprised', '어?! AI는 괜찮다고 했는데, 설명서에는 먹이지 말라고 써 있어!'],
+        ['me@worry', 'AI 말도 틀릴 수 있구나. 약은 설명서랑 약사, 119에 꼭 확인해야겠다.'],
         ['narr', 'AI는 그럴듯하게 말하지만 틀린 내용이 섞일 수 있어요. 몸과 안전에 관한 건 공식 정보로 한 번 더 확인해요.', ['mid', 'teen']]
       ]),
       next: 'hub'
     },
 
     search: {
-      bg: 'room', step: 1, phone: { app: 'search', title: '검색' },
+      bg: roomBg, step: 1, phone: { app: 'search', title: '검색' },
       cast: [['me', 'normal', 'left']],
       lines: [
         ['me', '"밤 아이 열 39도 병원 돈 없을 때" 검색!'],
@@ -199,7 +205,7 @@ window.EPISODE = (function () {
     },
 
     blog: {
-      bg: 'room', step: 1, phone: { app: 'search', title: '블로그' },
+      bg: roomBg, step: 1, phone: { app: 'search', title: '블로그' },
       cast: [['me', 'worry', 'left']],
       lines: [
         ['narr', '"소주를 수건에 묻혀 닦으면 열이 쏙!" 글 아래에는 영양제 광고가 잔뜩 붙어 있어요.'],
@@ -213,7 +219,7 @@ window.EPISODE = (function () {
     },
 
     gov: {
-      bg: 'room', step: 1, phone: { app: 'search', title: '응급의료포털' },
+      bg: roomBg, step: 1, phone: { app: 'search', title: '응급의료포털' },
       cast: [['me', 'surprised', 'left']],
       lines: [
         ['narr', '응급의료포털에서 "지금 문 연 병원"을 찾아봤어요.'],
@@ -232,14 +238,15 @@ window.EPISODE = (function () {
         ['narr', '1204호 문을 두드렸어요. 똑똑.'],
         S.flags.momAskedGrandma ? ['grandma', '아이고, 하람이구나. 방금 엄마한테 전화 받았다.'] : ['grandma', '아이고, 이 밤에 웬일이니?'],
         ['me', has(S, 'fever39') ? '할머니, 도윤이가 열이 39.2도예요. 엄마는 일하러 가셨어요.' : '할머니, 도윤이가 열이 펄펄 나요. 엄마는 일하러 가셨어요.'],
-        ['grandma', '저런, 많이 놀랐겠구나. 할머니가 같이 있어 줄게. 병원에 가야 하면 같이 가자.'],
-        ['me', '(혼자가 아니라서 다행이다.)']
+        ['grandma@worry', '저런, 많이 놀랐겠구나. 할머니가 같이 있어 줄게. 병원에 가야 하면 같이 가자.'],
+        ['@face', 'grandma', 'smile'],
+        ['me@smile', '(혼자가 아니라서 다행이다.)']
       ],
       next: 'hub'
     },
 
     call119: {
-      bg: 'room', step: 1, phone: { app: 'call', title: '119' },
+      bg: roomBg, step: 1, phone: { app: 'call', title: '119' },
       cast: [['me', 'worry', 'left']],
       lines: S => {
         const L = [
@@ -263,12 +270,13 @@ window.EPISODE = (function () {
     },
 
     towel: {
-      bg: 'room', step: 3,
-      cast: [['doyun', 'smile', 'bed', { flush: true, towel: true }], ['me', 'normal', 'center']],
+      bg: roomBg, step: 3,
+      cast: [['me', 'normal', 'right']],
       lines: [
         ['narr', '대야에 미지근한 물을 받아 수건을 적셨어요.'],
         ['narr', '이마와 목, 겨드랑이를 살살 닦아 주고, 물도 조금씩 먹였어요.'],
         ['doyun', '…시원해. 고마워.'],
+        ['@face', 'me', 'smile'],
         ['narr', '💡 찬물이나 얼음물은 오히려 몸을 덜덜 떨게 할 수 있어서 미지근한 물이 좋아요.']
       ],
       next: 'hub'
@@ -323,9 +331,9 @@ window.EPISODE = (function () {
           ['me', has(S, 'fever39') ? '동생이 열이 39.2도예요. 숨은 잘 쉬고, 목이 아프대요.' : '동생이 열이 많이 나요.']
         ];
         if (has(S, 'fever39')) L.push(['nurse', '정확하게 말해 줘서 접수가 빨리 됐어요. 잘했어요.']);
-        L.push(['narr', '진료실에서 의사 선생님이 도윤이를 봐 주셨어요.'], ['doc', '목이 많이 부었네요. 목감기예요. 약 먹고 푹 쉬면 나을 거예요.']);
-        if (has(S, 'care')) L.push(['doc', '집에서 물수건으로 닦아 줬구나. 아주 잘했어요.']);
-        L.push(['nurse', '진료비랑 약값 합해서 9,800원이에요.']);
+        L.push(['narr', '진료실에서 의사 선생님이 도윤이를 봐 주셨어요.'], ['@hide', 'nurse'], ['@show', 'doc', 'right', 'normal'], ['doc', '목이 많이 부었네요. 목감기예요. 약 먹고 푹 쉬면 나을 거예요.']);
+        if (has(S, 'care')) L.push(['doc@smile', '집에서 물수건으로 닦아 줬구나. 아주 잘했어요.'], ['@face', 'me', 'smile']);
+        L.push(['@hide', 'doc'], ['@show', 'nurse', 'right', 'smile'], ['nurse', '진료비랑 약값 합해서 9,800원이에요.']);
         return L;
       },
       choices: [
@@ -358,7 +366,9 @@ window.EPISODE = (function () {
         ['nurse', '먼저 상태를 볼게요. 열은 높지만 위급한 상태는 아니네요.'],
         ['nurse', '더 위급한 환자부터 봐야 해서 많이 기다려야 해요.'],
         ['narr', '두 시간 넘게 기다려서 진료를 받았어요.'],
+        ['@hide', 'nurse'], ['@show', 'doc', 'right', 'normal'],
         ['doc', '목감기예요. 약 먹고 쉬면 괜찮아요.'],
+        ['@hide', 'doc'], ['@show', 'nurse', 'right', 'normal'],
         ['nurse', '응급실 진료비는 52,000원이에요.']
       ],
       choices: [
@@ -380,8 +390,8 @@ window.EPISODE = (function () {
     },
 
     wait: {
-      bg: 'morning', step: 3,
-      cast: S => [['doyun', has(S, 'care') ? 'smile' : 'sick', 'bed', { flush: !has(S, 'care'), towel: has(S, 'care') }], ['me', 'normal', 'right']],
+      bg: morningBg, step: 3,
+      cast: [['me', 'normal', 'right']],
       enter: S => {
         const toMorning = 540 - S.min;
         S.apply({ min: Math.max(0, toMorning) });
@@ -393,7 +403,9 @@ window.EPISODE = (function () {
           ? ['narr', '물수건을 갈아 주고 물을 먹이며 도윤이 옆을 지켰어요. 숨소리도 계속 확인했어요.']
           : ['narr', '이불을 덮어 주고 옆에 누웠어요. 도윤이는 밤새 끙끙 앓았어요.'],
         ['narr', '아침 7시, 엄마가 헐레벌떡 들어오셨어요.'],
-        ['mom', has(S, 'care') ? '밤새 도윤이를 돌봐 줬구나. 정말 고마워.' : '많이 무서웠지? 혼자 버티느라 고생했어.'],
+        ['@show', 'mom', 'center', 'worry'],
+        [has(S, 'care') ? 'mom@smile' : 'mom@worry', has(S, 'care') ? '밤새 도윤이를 돌봐 줬구나. 정말 고마워.' : '많이 무서웠지? 혼자 버티느라 고생했어.'],
+        ['@face', 'me', 'smile'],
         ['narr', '엄마와 함께 아침 일찍 소아과에 갔어요. 목감기래요.']
       ],
       ending: {
@@ -408,6 +420,7 @@ window.EPISODE = (function () {
       bg: 'clinic', step: 4,
       cast: S => [['me', 'smile', 'left'], ['doyun', 'smile', 'center']].concat(S.flags.withGrandma ? [['grandma', 'smile', 'right']] : []),
       lines: S => [
+        ['@cg', 'clinic_walk_home'],
         ['narr', '약을 받아 들고 병원을 나섰어요.'],
         ['doyun', '이제 좀 괜찮아. 고마워.'],
         S.flags.walked ? ['narr', '돌아가는 길에 엄마가 택시를 불러 주셨어요.'] : ['narr', '집에 와서 도윤이는 금방 잠들었어요.']
@@ -463,6 +476,7 @@ window.EPISODE = (function () {
   return {
     id: 'fever-night',
     title: '열나는 밤, 지갑엔 3천 원',
+    titleArt: { bg: 'room_sick', cast: [['me', 'worry', 'right']] },
     blurb: '엄마는 야간 근무, 동생은 39도. 내 지갑엔 3천 원뿐이에요.',
     start: { node: 'intro', money: 3000, cond: 55, worry: 50, clock: 22 * 60 },
     names: { me: '하람', doyun: '도윤', grandma: '옆집 할머니', mom: '엄마', op: '119 상담원', ai: 'AI 도우미', nurse: '간호사 선생님', doc: '의사 선생님', driver: '택시 기사님', narr: '' },

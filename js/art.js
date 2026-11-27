@@ -1,11 +1,12 @@
-/* 그럴 땐 어떻게 — 그림 모듈
- * 지금은 모든 배경과 인물을 코드(SVG)로 그린다.
- * 나중에 AI로 만든 일러스트가 생기면 ASSETS에 경로만 넣으면 그 이미지로 바뀐다.
- *   예) ASSETS['bg.room'] = 'assets/bg_room.webp'
- *       ASSETS['char.me.worry'] = 'assets/me_worry.webp'  (발끝이 이미지 아래 가운데에 오도록)
+/* 그럴 땐 어떻게 — 임시 그림(코드로 그린 SVG)
+ *
+ * 비주얼 노벨 레이어 구조의 "빈자리 채우기"용 그림이다.
+ *   배경(bg)  : 800x500 한 장. 동생이 침대에 누운 모습처럼 배경에 붙는 것은 배경 차분(room_sick, room_towel …)
+ *   캐릭터    : 인물마다 표정 차분. 모든 인물이 같은 캔버스 비율(200x360, 발끝이 아래 가운데)이라
+ *               같은 높이로 띄우면 키 차이가 그대로 보인다.
+ * 진짜 일러스트가 생기면 assets/manifest.js에 경로만 적으면 이 그림 대신 그 이미지가 쓰인다.
  */
 window.ART = (function () {
-  const ASSETS = {};
   const W = 800, H = 500;
 
   /* ---------- 배경 ---------- */
@@ -28,8 +29,8 @@ window.ART = (function () {
       <radialGradient id="lamp" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFD27A" stop-opacity="${morning ? 0 : 0.55}"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></radialGradient>
     </defs>
     <rect width="${W}" height="${H}" fill="url(#wall)"/>
-    <rect y="400" width="${W}" height="100" fill="${morning ? '#C9A57A' : '#3B3355'}"/>
-    <rect y="398" width="${W}" height="6" fill="${morning ? '#B08A5E' : '#2A2440'}"/>
+    <rect y="350" width="${W}" height="150" fill="${morning ? '#C9A57A' : '#3B3355'}"/>
+    <rect y="348" width="${W}" height="6" fill="${morning ? '#B08A5E' : '#2A2440'}"/>
     <!-- 창문 -->
     <rect x="470" y="55" width="220" height="170" rx="8" fill="${morning ? '#FFF6E6' : '#47507E'}"/>
     <rect x="482" y="67" width="196" height="146" rx="4" fill="url(#sky)"/>
@@ -38,6 +39,7 @@ window.ART = (function () {
       : `<circle cx="630" cy="105" r="22" fill="#FFF3C4"/><circle cx="640" cy="98" r="20" fill="#24306A"/>${stars(18, 7, 486, 72, 186, 130)}`}
     <rect x="577" y="67" width="6" height="146" fill="${morning ? '#FFF6E6' : '#47507E'}"/>
     <rect x="482" y="136" width="196" height="6" fill="${morning ? '#FFF6E6' : '#47507E'}"/>
+    <g transform="translate(0 -50)">
     <!-- 책상과 스탠드 -->
     <circle cx="725" cy="300" r="140" fill="url(#lamp)"/>
     <rect x="650" y="330" width="150" height="14" rx="3" fill="${morning ? '#9C7350' : '#6B4F3A'}"/>
@@ -49,6 +51,7 @@ window.ART = (function () {
     <rect x="50" y="350" width="380" height="50" rx="10" fill="${morning ? '#FFFFFF' : '#D9DCEB'}"/>
     <rect x="50" y="392" width="380" height="18" rx="4" fill="${morning ? '#A87C55' : '#6B4F3A'}"/>
     <rect x="70" y="326" width="110" height="38" rx="18" fill="${morning ? '#FFFFFF' : '#EEF0F8'}"/>
+    </g>
     <!-- 벽 그림 -->
     <rect x="250" y="110" width="110" height="80" rx="4" fill="${morning ? '#FFFFFF' : '#C9CDE0'}"/>
     <path d="M262 176 L290 140 L312 166 L326 150 L348 176 Z" fill="#7FB8A4"/>
@@ -105,15 +108,11 @@ window.ART = (function () {
       <rect x="560" y="330" width="180" height="30" rx="6" fill="#FFFFFF"/><rect x="570" y="360" width="8" height="40" fill="#7B8597"/><rect x="722" y="360" width="8" height="40" fill="#7B8597"/>`
   };
 
-  function bg(id) {
-    if (ASSETS['bg.' + id]) return `<image href="${ASSETS['bg.' + id]}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>`;
-    return (BG[id] || BG.room)();
-  }
-
   /* ---------- 인물 ---------- */
   const PEOPLE = {
     me:      { skin: '#F4D1B3', hair: '#3A2A22', style: 'bob',   top: '#F2C14E', bottom: '#46557A', scale: 0.95 },
     doyun:   { skin: '#F6D7BC', hair: '#2A211C', style: 'messy', top: '#8EC5E8', bottom: '#8EC5E8', scale: 0.78, pj: true },
+    mom:     { skin: '#F2CDAE', hair: '#2B201B', style: 'long',  top: '#6F8FB8', bottom: '#3E4560', scale: 1.04 },
     grandma: { skin: '#EFCCAE', hair: '#C9C6C2', style: 'bun',   top: '#B5677A', bottom: '#5B5466', scale: 0.98 },
     nurse:   { skin: '#F1CFB0', hair: '#2D2420', style: 'tied',  top: '#7CC4B4', bottom: '#7CC4B4', scale: 1.02 },
     doc:     { skin: '#EAC6A6', hair: '#2E2A28', style: 'short', top: '#FFFFFF', bottom: '#4A5068', scale: 1.05, glasses: true, coat: true },
@@ -139,6 +138,7 @@ window.ART = (function () {
   }
   function hairBack(p) {
     if (p.style === 'bob') return `<path d="M-58 -215 q0 -64 58 -64 q58 0 58 64 l0 46 q-12 8 -22 0 l0 -40 l-72 0 l0 40 q-10 8 -22 0 Z" fill="${p.hair}"/>`;
+    if (p.style === 'long') return `<path d="M-58 -215 q0 -66 58 -66 q58 0 58 66 l4 96 q-30 10 -40 0 l-4 -80 l-36 0 l-36 0 l-4 80 q-10 10 -40 0 Z" fill="${p.hair}"/>`;
     if (p.style === 'tied') return `<circle cx="0" cy="-268" r="18" fill="${p.hair}"/>`;
     if (p.style === 'bun') return `<circle cx="0" cy="-276" r="22" fill="${p.hair}"/>`;
     return '';
@@ -148,6 +148,7 @@ window.ART = (function () {
       case 'bob': return `<path d="M-54 -222 q4 -54 54 -54 q50 0 54 54 q-30 -6 -48 -30 q-20 26 -60 30 Z" fill="${p.hair}"/>`;
       case 'messy': return `<path d="M-52 -220 q-4 -58 52 -58 q56 0 52 58 l-10 -14 l-8 12 l-10 -16 l-10 12 l-12 -16 l-10 14 l-12 -14 l-10 14 Z" fill="${p.hair}"/>`;
       case 'bun': return `<path d="M-54 -218 q2 -56 54 -56 q52 0 54 56 q-26 -24 -54 -24 q-28 0 -54 24 Z" fill="${p.hair}"/>`;
+      case 'long': return `<path d="M-54 -220 q2 -56 54 -56 q52 0 54 56 q-36 -8 -54 -32 q-18 24 -54 32 Z" fill="${p.hair}"/>`;
       case 'tied': return `<path d="M-54 -218 q2 -56 54 -56 q52 0 54 56 q-20 -30 -54 -30 q-34 0 -54 30 Z" fill="${p.hair}"/>`;
       case 'cap': return `<path d="M-54 -226 q2 -52 54 -52 q52 0 54 52 Z" fill="#2F3B52"/><rect x="-4" y="-232" width="76" height="10" rx="5" fill="#2F3B52"/>`;
       default: return `<path d="M-52 -222 q4 -54 52 -54 q48 0 52 54 q-24 -18 -52 -18 q-28 0 -52 18 Z" fill="${p.hair}"/>`;
@@ -181,7 +182,7 @@ window.ART = (function () {
   function lying(mood, flush, towel) {
     const p = PEOPLE.doyun;
     return `
-      <g transform="translate(125 340)">
+      <g transform="translate(0 -50)"><g transform="translate(125 340)">
         <circle cx="0" cy="0" r="40" fill="${p.skin}"/>
         <path d="M-40 -6 q-2 -42 40 -42 q42 0 40 42 l-8 -10 l-8 9 l-8 -12 l-8 9 l-10 -12 l-8 10 l-10 -11 l-8 11 Z" fill="${p.hair}"/>
         <path d="M-20 4 q6 4 12 0 M8 4 q6 4 12 0" stroke="#2A2220" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -191,25 +192,42 @@ window.ART = (function () {
         ${flush && !towel ? '<path d="M44 -30 q6 -8 0 -16 M56 -26 q6 -8 0 -16" stroke="#FF9F6E" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>' : ''}
       </g>
       <path d="M160 330 q120 -26 262 4 l0 56 l-262 0 Z" fill="#7FA7D9"/>
-      <path d="M160 330 q120 -26 262 4" stroke="#6A93C6" stroke-width="4" fill="none"/>`;
+      <path d="M160 330 q120 -26 262 4" stroke="#6A93C6" stroke-width="4" fill="none"/></g>`;
   }
 
-  const POS = { left: 200, center: 420, right: 620, far: 700 };
-
-  /* cast: [[id, mood, pos, opts]], speaker: 지금 말하는 사람 id */
-  function scene(bgId, cast, speaker, extra) {
-    let out = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="장면 그림" xmlns="http://www.w3.org/2000/svg">${bg(bgId)}`;
-    (cast || []).forEach(([id, mood, pos, o]) => {
-      o = o || {};
-      if (pos === 'bed') { out += lying(mood, o.flush, o.towel); return; }
-      const key = `char.${id}.${mood}`;
-      const x = POS[pos] || POS.center, sc = (PEOPLE[id] || {}).scale || 1;
-      const dim = speaker && speaker !== id && speaker !== 'narr' ? ' opacity="0.82"' : '';
-      if (ASSETS[key]) { out += `<image href="${ASSETS[key]}" x="${x - 120}" y="${470 - 340}" width="240" height="340"${dim}/>`; return; }
-      out += `<g transform="translate(${x} 472) scale(${sc})"${dim}>${person(id, mood, o.flush)}</g>`;
-    });
-    return out + (extra || '') + '</svg>';
+  /* 배경 차분: '기본배경_차분' 이름 규칙 */
+  const BG_VARIANTS = {
+    room_sick:     ['room', () => lying('sick', true, false)],
+    room_towel:    ['room', () => lying('smile', true, true)],
+    morning_sick:  ['morning', () => lying('sick', true, false)],
+    morning_towel: ['morning', () => lying('smile', false, true)]
+  };
+  function bgSVG(id) {
+    const v = BG_VARIANTS[id];
+    const base = v ? v[0] : id;
+    const body = (BG[base] || BG.room)() + (v ? v[1]() : '');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">${body}</svg>`;
   }
 
-  return { ASSETS, scene };
+  /* 캐릭터 한 명 = 독립된 투명 그림. 캔버스 200x360, 발끝은 (100, 352) */
+  function spriteSVG(id, face) {
+    const sc = (PEOPLE[id] || {}).scale || 1;
+    const flush = id === 'doyun' && face === 'sick';
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -350 200 360"><g transform="translate(0 2) scale(${sc})">${person(id, face, flush)}</g></svg>`;
+  }
+
+  const toURI = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  const M = () => window.ASSET_MANIFEST || { bg: {}, chars: {}, cg: {} };
+
+  /* 실제 일러스트가 있으면 그 경로, 없으면 임시 SVG */
+  function bg(id) { return (M().bg || {})[id] || toURI(bgSVG(id)); }
+  function sprite(id, face) {
+    const c = (M().chars || {})[id] || {};
+    return c[face] || c.normal || toURI(spriteSVG(id, face));
+  }
+  function cg(id) { return (M().cg || {})[id] || null; }
+  const faces = { me: ['normal', 'worry', 'surprised', 'smile'], doyun: ['sick', 'smile', 'normal'], grandma: ['normal', 'worry', 'smile'], mom: ['normal', 'worry', 'smile'], nurse: ['normal', 'smile'], doc: ['normal', 'smile'], driver: ['normal', 'smile'] };
+  const bgs = ['room', 'room_sick', 'room_towel', 'morning', 'morning_sick', 'morning_towel', 'hall', 'street', 'clinic', 'er'];
+
+  return { bg, sprite, cg, bgSVG, spriteSVG, faces, bgs, isReal: { bg: id => !!(M().bg || {})[id], sprite: (id, f) => !!((M().chars || {})[id] || {})[f] } };
 })();

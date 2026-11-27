@@ -68,6 +68,88 @@
     $('#steps').innerHTML = STEPS.map((s, k) => `<li class="${k === i ? 'on' : k < i ? 'past' : ''}">${s}</li>`).join('');
   }
 
+  /* ---------- 무대: 비주얼 노벨 레이어 ----------
+   * 배경 레이어 → 캐릭터 레이어 → CG 레이어 → 휴대폰 화면 → 대사창
+   * 같은 인물은 장면이 바뀌어도 그대로 남아 표정·자리만 바뀐다(깜빡이지 않음).
+   */
+  const POS = { farleft: 12, left: 24, center: 50, right: 76, farright: 88 };
+  const Stage = {
+    bgId: null, cast: new Map(),
+    bg(id) {
+      if (!id || id === this.bgId) return;
+      this.bgId = id;
+      const layer = $('#layer-bg');
+      const img = new Image();
+      img.className = 'bg'; img.alt = ''; img.src = ART.bg(id);
+      layer.appendChild(img);
+      const olds = [...layer.children].filter(x => x !== img);
+      requestAnimationFrame(() => requestAnimationFrame(() => img.classList.add('in')));
+      setTimeout(() => olds.forEach(o => o.remove()), reduce ? 0 : 500);
+    },
+    show(id, pos, face) {
+      let c = this.cast.get(id);
+      if (!c) {
+        const el = document.createElement('div');
+        el.className = 'sprite'; el.dataset.id = id;
+        el.innerHTML = '<img alt="">';
+        $('#layer-chars').appendChild(el);
+        c = { el, face: null, pos: null };
+        this.cast.set(id, c);
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+      }
+      if (pos && pos !== c.pos) { c.pos = pos; c.el.style.left = (POS[pos] ?? parseFloat(pos)) + '%'; }
+      this.face(id, face || c.face || 'normal');
+    },
+    face(id, face) {
+      const c = this.cast.get(id);
+      if (!c || !face || face === c.face) return;
+      c.face = face;
+      const img = c.el.querySelector('img');
+      img.src = ART.sprite(id, face);
+      img.alt = `${EP.names[id] || id} (${face})`;
+    },
+    hide(id) {
+      const c = this.cast.get(id);
+      if (!c) return;
+      this.cast.delete(id);
+      c.el.classList.remove('in');
+      setTimeout(() => c.el.remove(), reduce ? 0 : 350);
+    },
+    set(list) {
+      const keep = new Set(list.map(x => x[0]));
+      [...this.cast.keys()].forEach(k => { if (!keep.has(k)) this.hide(k); });
+      list.forEach(([id, face, pos]) => this.show(id, pos, face));
+    },
+    speak(who) {
+      const onStage = this.cast.has(who);
+      this.cast.forEach((c, id) => c.el.classList.toggle('dim', onStage && id !== who));
+    },
+    cg(id) {
+      const src = id && ART.cg(id);
+      const layer = $('#layer-cg');
+      if (!src) { layer.classList.remove('in'); return; }
+      layer.querySelector('img').src = src;
+      layer.classList.add('in');
+    },
+    shake() {
+      if (reduce) return;
+      const st = $('#stage');
+      st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake');
+    },
+    reset() { this.bgId = null; this.cast.clear(); $('#layer-bg').innerHTML = ''; $('#layer-chars').innerHTML = ''; this.cg(null); }
+  };
+
+  /* 대본 지시어: ['@bg', id] ['@show', 인물, 자리, 표정] ['@hide', 인물] ['@face', 인물, 표정] ['@cg', id|null] ['@shake'] */
+  function direct(l) {
+    const [cmd, a, b, c] = l;
+    if (cmd === '@bg') Stage.bg(val(a));
+    else if (cmd === '@show') Stage.show(a, b, c);
+    else if (cmd === '@hide') Stage.hide(a);
+    else if (cmd === '@face') Stage.face(a, b);
+    else if (cmd === '@cg') Stage.cg(a);
+    else if (cmd === '@shake') Stage.shake();
+  }
+
   /* ---------- 장면 ---------- */
   function goto(id) {
     id = EP.redirect ? EP.redirect(S, id) : id;
@@ -77,9 +159,12 @@
     if (node.enter) node.enter(S);
     steps(val(node.step) ?? 0);
     const lines = (typeof node.lines === 'function' ? node.lines(S) : node.lines || [])
-      .filter(l => l && (!l[2] || l[2].includes(S.age)))
-      .map(l => [l[0], val(l[1])]);
+      .filter(l => l && (String(l[0]).startsWith('@') || !l[2] || l[2].includes(S.age)))
+      .map(l => (String(l[0]).startsWith('@') ? l : [l[0], val(l[1])]));
     queue = lines; qi = 0;
+    Stage.bg(val(node.bg));
+    Stage.set(val(node.cast) || []);
+    Stage.cg(val(node.cg) || null);
     $('#phone-log').innerHTML = '';
     $('#choices').innerHTML = '';
     $('#choices').hidden = true;
@@ -91,15 +176,13 @@
     showLine();
   }
 
-  function drawStage(speaker) {
-    $('#stage-art').innerHTML = ART.scene(val(node.bg), val(node.cast), speaker);
-  }
-
   function showLine() {
+    while (queue[qi] && String(queue[qi][0]).startsWith('@')) { direct(queue[qi]); qi += 1; }
     const line = queue[qi];
-    if (!line) { drawStage(null); return finishNode(); }
-    const [who, text] = line;
-    drawStage(who);
+    if (!line) { Stage.speak(null); return finishNode(); }
+    let [who, text] = line;
+    if (who.includes('@')) { const [id, face] = who.split('@'); who = id; Stage.face(id, face); }
+    Stage.speak(who);
     const name = EP.names[who] ?? who;
     const nameEl = $('#speaker');
     nameEl.textContent = name;
@@ -236,6 +319,7 @@
   /* ---------- 시작 ---------- */
   function start(age) {
     S = newState(age);
+    Stage.reset();
     $('#title').hidden = true;
     $('#ending').hidden = true;
     $('#age-chip').textContent = AGES[age];
@@ -246,9 +330,14 @@
   function boot() {
     $('#ep-title').textContent = EP.title;
     $('#ep-blurb').textContent = EP.blurb;
-    $('#title-art').innerHTML = ART.scene('room', [['doyun', 'sick', 'bed', { flush: true }], ['me', 'worry', 'right']]);
+    const ta = EP.titleArt || { bg: 'room_sick', cast: [['me', 'worry', 'right']] };
+    $('#title-art').innerHTML = `<img class="bg in" alt="" src="${ART.bg(ta.bg)}">` +
+      ta.cast.map(([id, face, pos]) => `<div class="sprite in" style="left:${POS[pos] ?? 50}%"><img alt="" src="${ART.sprite(id, face)}"></div>`).join('');
     const found = store.get().length;
     $('#title-count').textContent = found ? `찾은 엔딩 ${Math.min(found, EP.endingCount)} / ${EP.endingCount}` : `엔딩 ${EP.endingCount}가지`;
+    if (window.CATALOG) {
+      $('#roadmap').innerHTML = CATALOG.map(g => `<section><h3>${g.age}</h3><ul>${g.items.map(i => `<li class="${i.ready ? 'ready' : ''}">${i.t}<span>${i.ready ? '플레이 가능' : '준비 중'}</span></li>`).join('')}</ul></section>`).join('');
+    }
     document.querySelectorAll('[data-age]').forEach(b => b.addEventListener('click', () => start(b.dataset.age)));
     $('#dialog').addEventListener('click', advance);
     $('#next').addEventListener('click', e => { e.stopPropagation(); advance(); });

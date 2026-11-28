@@ -8,7 +8,7 @@
  *      ages: 보여줄 나이, once: 한 번만, fx: 효과, go: 다음 장면
  *  - 나이: low(초 1~3) / mid(초 4~6) / teen(중학생)
  */
-window.EPISODE = (function () {
+(window.EPISODES = window.EPISODES || []).push((function () {
   const has = (S, k) => S.cards.has(k);
   // had: 선택지를 고르기 직전에 이미 알고 있던 단서 (선택 효과로 새로 얻은 카드는 제외)
   const had = (S, k) => (S.had || S.cards).has(k);
@@ -478,7 +478,16 @@ window.EPISODE = (function () {
     title: '열나는 밤, 지갑엔 3천 원',
     titleArt: { bg: 'room_sick', cast: [['me', 'worry', 'right']] },
     blurb: '엄마는 야간 근무, 동생은 39도. 내 지갑엔 3천 원뿐이에요.',
+    recommend: '초등 4학년 이상',
     start: { node: 'intro', money: 3000, cond: 55, worry: 50, clock: 22 * 60 },
+    gauges: [
+      { key: 'clock', label: '시각' },
+      { key: 'money', label: '가진 돈', type: 'won' },
+      { key: 'cond', label: '도윤이 컨디션', type: 'bar', tone: 'good' },
+      { key: 'worry', label: '내 마음 (걱정)', type: 'bar', tone: 'worry' }
+    ],
+    // 물수건으로 돌보기 전에는 시간이 갈수록 도윤이 컨디션이 조금씩 나빠진다
+    onTime(S, min) { if (!S.cards.has('care')) S.cond = Math.max(0, S.cond - Math.round(min / 10)); },
     names: { me: '하람', doyun: '도윤', grandma: '옆집 할머니', mom: '엄마', op: '119 상담원', ai: 'AI 도우미', nurse: '간호사 선생님', doc: '의사 선생님', driver: '택시 기사님', narr: '' },
     phoneSpeakers: ['mom', 'op', 'ai'],
     cards, nodes, powers, questions, hint,
@@ -488,4 +497,4 @@ window.EPISODE = (function () {
       return id;
     }
   };
-})();
+})());

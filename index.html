@@ -19,12 +19,7 @@
         <button type="button" id="home-btn" class="pill ghost" aria-label="처음 화면으로">처음</button>
       </div>
     </div>
-    <dl class="gauges">
-      <div class="g"><dt>시각</dt><dd id="g-clock" class="num">22:00</dd></div>
-      <div class="g"><dt>가진 돈</dt><dd id="g-money" class="num">3,000원</dd></div>
-      <div class="g bar"><dt>도윤이 컨디션</dt><dd><span id="g-cond" class="meter good" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55"></span></dd></div>
-      <div class="g bar"><dt>내 마음 (걱정)</dt><dd><span id="g-worry" class="meter worry" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></span></dd></div>
-    </dl>
+    <dl class="gauges" id="gauges"></dl>
   </header>
 
   <main class="play">
@@ -60,13 +55,9 @@
       <p class="eyebrow">문제 해결 이야기 게임</p>
       <h1 id="game-name">그럴 땐 어떻게?</h1>
       <p class="lede">외워서 맞히는 정답은 없어요. 살피고, 알아보고, 물어보고, 해 보면서 나만의 길을 찾는 게임이에요.</p>
-      <div class="episode">
-        <span class="ep-no">에피소드 1</span>
-        <h2 id="ep-title"></h2>
-        <p id="ep-blurb"></p>
-        <p id="title-count" class="count"></p>
-      </div>
-      <p class="pick">몇 학년이에요?</p>
+      <p class="pick">어떤 이야기를 해 볼까요?</p>
+      <div id="episodes" class="episodes"></div>
+      <p class="pick" id="pick-age">몇 학년이에요?</p>
       <div class="ages">
         <button type="button" id="age-low" data-age="low"><b>초등 1~3학년</b><span>힌트를 많이 줘요</span></button>
         <button type="button" id="age-mid" data-age="mid"><b>초등 4~6학년</b><span>검색하고 비교해요</span></button>
@@ -118,6 +109,7 @@
 <script src="assets/manifest.js"></script>
 <script src="js/art.js"></script>
 <script src="scenarios/fever-night.js"></script>
+<script src="scenarios/lost-mart.js"></script>
 <script src="scenarios/catalog.js"></script>
 <script src="js/engine.js"></script>
 </body>

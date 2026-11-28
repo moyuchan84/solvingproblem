@@ -58,7 +58,68 @@ window.ART = (function () {
     <circle cx="330" cy="130" r="9" fill="#F2C14E"/>`;
   }
 
+  /* 마트 진열대 한 칸 */
+  function shelf(x, y, w, colors) {
+    let o = `<rect x="${x}" y="${y}" width="${w}" height="250" fill="#E9E4DA"/><rect x="${x}" y="${y}" width="${w}" height="10" fill="#C9C2B4"/>`;
+    for (let r = 0; r < 4; r++) {
+      const yy = y + 18 + r * 58;
+      o += `<rect x="${x}" y="${yy + 44}" width="${w}" height="6" fill="#B9B1A1"/>`;
+      for (let i = 0; i < Math.floor(w / 26); i++) {
+        const c = colors[(i + r * 2) % colors.length];
+        const h = 30 + ((i * 7 + r * 5) % 12);
+        o += `<rect x="${x + 4 + i * 26}" y="${yy + 44 - h}" width="20" height="${h}" rx="3" fill="${c}"/>`;
+      }
+    }
+    return o;
+  }
+  function hangSign(x, text, color) {
+    return `<rect x="${x - 2}" y="0" width="3" height="40" fill="#9C9686"/><rect x="${x + 96}" y="0" width="3" height="40" fill="#9C9686"/>
+      <rect x="${x - 20}" y="38" width="140" height="40" rx="8" fill="${color}"/>
+      <text x="${x + 50}" y="66" text-anchor="middle" font-size="20" fill="#fff" font-family="'Jua','Gowun Dodum',sans-serif">${text}</text>`;
+  }
+
   const BG = {
+    mart_aisle: () => `
+      <rect width="${W}" height="${H}" fill="#F4F1EA"/>
+      <rect width="${W}" height="110" fill="#FBFAF6"/>
+      ${[80, 300, 520, 700].map(x => `<rect x="${x}" y="14" width="90" height="10" rx="5" fill="#FFFFFF" stroke="#E2DED3"/>`).join('')}
+      <rect y="380" width="${W}" height="120" fill="#D9D3C5"/>
+      ${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => `<path d="M${i * 100} 380 L${i * 100 - 60} 500" stroke="#CBC4B4" stroke-width="2"/>`).join('')}
+      ${shelf(0, 130, 260, ['#F2A93B', '#E0584B', '#F5D04E', '#7FB8A4', '#5B8BD9'])}
+      ${shelf(540, 130, 260, ['#E86A9A', '#F2A93B', '#7FC6E8', '#A8D46F', '#F5D04E'])}
+      <path d="M260 130 L330 160 L330 360 L260 380 Z" fill="#DCD6CA"/><path d="M540 130 L470 160 L470 360 L540 380 Z" fill="#DCD6CA"/>
+      <rect x="330" y="160" width="140" height="200" fill="#ECE8DF"/>
+      ${shelf(345, 175, 110, ['#C9BFE8', '#F5D04E', '#7FB8A4'])}
+      ${hangSign(80, '과자 · 음료', '#E0584B')}
+      ${hangSign(600, '장난감', '#5B8BD9')}`,
+    mart_info: () => `
+      <rect width="${W}" height="${H}" fill="#F1EFE8"/>
+      <rect y="380" width="${W}" height="120" fill="#D9D3C5"/>
+      <rect x="0" y="70" width="${W}" height="14" fill="#2F7A5A"/>
+      <rect x="250" y="110" width="300" height="56" rx="10" fill="#2F7A5A"/>
+      <text x="400" y="147" text-anchor="middle" font-size="26" fill="#fff" font-family="'Jua','Gowun Dodum',sans-serif">고객센터</text>
+      <circle cx="640" cy="140" r="26" fill="#FFFFFF" stroke="#2F7A5A" stroke-width="4"/>
+      <path d="M628 132 h8 l10 -8 v32 l-10 -8 h-8 Z" fill="#2F7A5A"/><path d="M652 130 q6 10 0 20" stroke="#2F7A5A" stroke-width="3" fill="none"/>
+      <rect x="180" y="250" width="440" height="140" rx="10" fill="#FFFFFF" stroke="#D8D2C4" stroke-width="2"/>
+      <rect x="180" y="250" width="440" height="22" rx="8" fill="#7FB89A"/>
+      <rect x="230" y="200" width="70" height="50" rx="4" fill="#3E4656"/><rect x="236" y="206" width="58" height="36" fill="#9FC4E6"/>
+      <rect x="520" y="222" width="40" height="28" rx="4" fill="#E8E2D0"/>
+      <rect x="40" y="200" width="110" height="180" fill="#E9E4DA"/><rect x="40" y="200" width="110" height="12" fill="#C9C2B4"/>
+      ${[230, 290, 350].map(y => `<rect x="48" y="${y}" width="94" height="6" fill="#B9B1A1"/><rect x="52" y="${y - 24}" width="20" height="24" fill="#F2A93B"/><rect x="78" y="${y - 28}" width="20" height="28" fill="#7FC6E8"/><rect x="104" y="${y - 22}" width="20" height="22" fill="#E86A9A"/>`).join('')}`,
+    mart_exit: () => `
+      <defs><linearGradient id="out" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFE0F5"/><stop offset="1" stop-color="#E8F4FB"/></linearGradient></defs>
+      <rect width="${W}" height="${H}" fill="#EEEBE3"/>
+      <rect y="400" width="${W}" height="100" fill="#D3CDBF"/>
+      <rect x="170" y="60" width="460" height="340" fill="url(#out)"/>
+      <rect x="170" y="300" width="460" height="100" fill="#8E929C"/>
+      ${[200, 330, 470].map((x, i) => `<rect x="${x}" y="${272 - i * 4}" width="110" height="48" rx="14" fill="${['#E0584B', '#FFFFFF', '#3F5E9A'][i]}"/><circle cx="${x + 24}" cy="${322 - i * 4}" r="12" fill="#2E2A33"/><circle cx="${x + 86}" cy="${322 - i * 4}" r="12" fill="#2E2A33"/><rect x="${x + 18}" y="${280 - i * 4}" width="70" height="18" rx="6" fill="#BFE0F5"/>`).join('')}
+      <rect x="390" y="300" width="20" height="100" fill="#F5D04E" opacity="0.8"/>
+      <rect x="170" y="60" width="460" height="340" fill="none" stroke="#9AA3AF" stroke-width="10"/>
+      <rect x="395" y="60" width="10" height="340" fill="#9AA3AF"/>
+      <rect x="250" y="20" width="300" height="36" rx="8" fill="#3E4656"/>
+      <text x="400" y="45" text-anchor="middle" font-size="18" fill="#fff" font-family="'Jua',sans-serif">출입구 · 주차장</text>
+      <rect x="40" y="250" width="90" height="150" rx="6" fill="#C7C2B6"/><rect x="48" y="260" width="74" height="60" fill="#E6E1D4"/>
+      <rect x="680" y="300" width="90" height="100" rx="6" fill="#A8B3BF"/><rect x="690" y="290" width="70" height="14" rx="6" fill="#8E9AA8"/>`,
     room: () => room(false),
     morning: () => room(true),
     hall: () => `
@@ -112,6 +173,11 @@ window.ART = (function () {
   const PEOPLE = {
     me:      { skin: '#F4D1B3', hair: '#3A2A22', style: 'bob',   top: '#F2C14E', bottom: '#46557A', scale: 0.95 },
     doyun:   { skin: '#F6D7BC', hair: '#2A211C', style: 'messy', top: '#8EC5E8', bottom: '#8EC5E8', scale: 0.78, pj: true },
+    doyun_day: { skin: '#F6D7BC', hair: '#2A211C', style: 'messy', top: '#F2934E', bottom: '#4A6FA5', scale: 0.78 },
+    mom_day: { skin: '#F2CDAE', hair: '#2B201B', style: 'long',  top: '#5FA77A', bottom: '#3E4560', scale: 1.04 },
+    clerk:   { skin: '#EFCBAA', hair: '#2E2622', style: 'short', top: '#FFFFFF', bottom: '#3E4560', scale: 1.02, vest: '#D9483B' },
+    customer:{ skin: '#F3CFB0', hair: '#4A3328', style: 'bob',   top: '#E7B6C9', bottom: '#6A6F80', scale: 0.98 },
+    stranger:{ skin: '#E9C4A2', hair: '#38302B', style: 'cap',   top: '#7A7D86', bottom: '#3B4152', scale: 1.03 },
     mom:     { skin: '#F2CDAE', hair: '#2B201B', style: 'long',  top: '#6F8FB8', bottom: '#3E4560', scale: 1.04 },
     grandma: { skin: '#EFCCAE', hair: '#C9C6C2', style: 'bun',   top: '#B5677A', bottom: '#5B5466', scale: 0.98 },
     nurse:   { skin: '#F1CFB0', hair: '#2D2420', style: 'tied',  top: '#7CC4B4', bottom: '#7CC4B4', scale: 1.02 },
@@ -124,6 +190,7 @@ window.ART = (function () {
       case 'sick': return `<path d="M-26 -212 q8 5 16 0 M10 -212 q8 5 16 0" stroke="#2A2220" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
       case 'smile': return `<path d="M-26 -208 q8 -9 16 0 M10 -208 q8 -9 16 0" stroke="#2A2220" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
       case 'surprised': return `<circle cx="-18" cy="-210" r="7" fill="#fff" stroke="#2A2220" stroke-width="3"/><circle cx="18" cy="-210" r="7" fill="#fff" stroke="#2A2220" stroke-width="3"/><circle cx="-18" cy="-210" r="3" fill="#2A2220"/><circle cx="18" cy="-210" r="3" fill="#2A2220"/>`;
+      case 'cry': return `<path d="M-27 -206 q9 -8 18 -2 M9 -208 q9 -6 18 2" stroke="#2A2220" stroke-width="3.5" fill="none" stroke-linecap="round"/><ellipse cx="-18" cy="-209" rx="3.5" ry="4" fill="#2A2220"/><ellipse cx="18" cy="-209" rx="3.5" ry="4" fill="#2A2220"/><path d="M-28 -226 L-10 -230 M28 -226 L10 -230" stroke="#2A2220" stroke-width="3" stroke-linecap="round"/><path d="M-20 -202 q-3 10 0 16 q3 -6 0 -16 M20 -202 q-3 10 0 16 q3 -6 0 -16" fill="#7EC4F0"/>`;
       case 'worry': return `<ellipse cx="-18" cy="-209" rx="4.5" ry="6" fill="#2A2220"/><ellipse cx="18" cy="-209" rx="4.5" ry="6" fill="#2A2220"/><path d="M-28 -226 L-10 -230 M28 -226 L10 -230" stroke="#2A2220" stroke-width="3" stroke-linecap="round"/>`;
       default: return `<ellipse cx="-18" cy="-209" rx="4.5" ry="6" fill="#2A2220"/><ellipse cx="18" cy="-209" rx="4.5" ry="6" fill="#2A2220"/>`;
     }
@@ -132,6 +199,7 @@ window.ART = (function () {
     switch (mood) {
       case 'smile': return `<path d="M-12 -190 q12 12 24 0" stroke="#7A3B30" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
       case 'surprised': return `<ellipse cx="0" cy="-186" rx="6" ry="8" fill="#7A3B30"/>`;
+      case 'cry': return `<path d="M-10 -182 q10 -10 20 0 Z" fill="#7A3B30"/>`;
       case 'worry': case 'sick': return `<path d="M-10 -184 q10 -8 20 0" stroke="#7A3B30" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
       default: return `<path d="M-9 -188 q9 6 18 0" stroke="#7A3B30" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
     }
@@ -165,6 +233,7 @@ window.ART = (function () {
       <path d="M-44 -150 q44 -22 88 0 l6 90 q-50 14 -100 0 Z" fill="${p.top}"/>
       ${p.pj ? `<circle cx="-14" cy="-110" r="4" fill="#fff" opacity="0.7"/><circle cx="14" cy="-90" r="4" fill="#fff" opacity="0.7"/>` : ''}
       ${coat}
+      ${p.vest ? `<path d="M-44 -150 L-14 -150 L-6 -64 L-46 -64 Z" fill="${p.vest}"/><path d="M44 -150 L14 -150 L6 -64 L46 -64 Z" fill="${p.vest}"/><rect x="18" y="-128" width="20" height="12" rx="2" fill="#FFFFFF"/>` : ''}
       <rect x="-62" y="-146" width="20" height="78" rx="10" fill="${p.coat ? '#FFFFFF' : p.top}"/>
       <rect x="42" y="-146" width="20" height="78" rx="10" fill="${p.coat ? '#FFFFFF' : p.top}"/>
       <circle cx="-52" cy="-66" r="10" fill="${p.skin}"/><circle cx="52" cy="-66" r="10" fill="${p.skin}"/>
@@ -226,8 +295,11 @@ window.ART = (function () {
     return c[face] || c.normal || toURI(spriteSVG(id, face));
   }
   function cg(id) { return (M().cg || {})[id] || null; }
-  const faces = { me: ['normal', 'worry', 'surprised', 'smile'], doyun: ['sick', 'smile', 'normal'], grandma: ['normal', 'worry', 'smile'], mom: ['normal', 'worry', 'smile'], nurse: ['normal', 'smile'], doc: ['normal', 'smile'], driver: ['normal', 'smile'] };
-  const bgs = ['room', 'room_sick', 'room_towel', 'morning', 'morning_sick', 'morning_towel', 'hall', 'street', 'clinic', 'er'];
+  const faces = {
+    doyun_day: ['normal', 'worry', 'cry', 'surprised', 'smile'], mom_day: ['normal', 'worry', 'smile'],
+    clerk: ['normal', 'smile'], customer: ['normal', 'smile'], stranger: ['normal', 'smile'],
+    me: ['normal', 'worry', 'surprised', 'smile'], doyun: ['sick', 'smile', 'normal'], grandma: ['normal', 'worry', 'smile'], mom: ['normal', 'worry', 'smile'], nurse: ['normal', 'smile'], doc: ['normal', 'smile'], driver: ['normal', 'smile'] };
+  const bgs = ['mart_aisle', 'mart_info', 'mart_exit', 'room', 'room_sick', 'room_towel', 'morning', 'morning_sick', 'morning_towel', 'hall', 'street', 'clinic', 'er'];
 
   return { bg, sprite, cg, bgSVG, spriteSVG, faces, bgs, isReal: { bg: id => !!(M().bg || {})[id], sprite: (id, f) => !!((M().chars || {})[id] || {})[f] } };
 })();

@@ -50,9 +50,9 @@
 <body>
 <div class="page">
   <header>
-    <p class="eyebrow">만드는 사람용 · 에피소드 1</p>
+    <p class="eyebrow">만드는 사람용 · 모든 에피소드</p>
     <h1>이미지 생성 문장 모음</h1>
-    <p>Gemini 같은 이미지 생성 AI에 그대로 붙여 넣는 문장입니다. 번호 순서대로 만들면 같은 얼굴, 같은 그림체가 유지돼요.</p>
+    <p>Gemini 같은 이미지 생성 AI에 그대로 붙여 넣는 문장입니다. 번호 순서대로 만들면 같은 얼굴, 같은 그림체가 유지돼요. 같은 인물이 다른 옷을 입는 에피소드는 "옷 바꾸기"로, 원래 기준 그림에서 옷만 바꿉니다.</p>
   </header>
 
   <ol class="how">
@@ -164,20 +164,27 @@
   P.characters.forEach(c => {
     const g = document.createElement('div');
     g.className = 'group';
-    g.innerHTML = `<h3>${c.name} <small>${c.id} · 표정 ${c.faces.length + 1}개</small></h3>`;
+    g.innerHTML = `<h3>${c.name} <small>${c.ep} · ${c.id} · 그림 ${c.faces.length + 1}장</small></h3>`;
     charList.appendChild(g);
-    add(g, { key: `c-${c.id}-${c.base.face}`, title: `${c.name.split(' ')[0]} · 기준 그림`, ko: c.base.ko, kind: '새로 그리기',
+    const baseOf = c.variantOf && P.characters.find(x => x.id === c.variantOf);
+    add(g, c.variantOf ? {
+      key: `c-${c.id}-${c.base.face}`, title: `${c.name.split(' ')[0]} · 옷 바꾼 기준 그림`, ko: c.base.ko, kind: '옷 바꾸기',
+      ref: `${baseOf.name.split(' ')[0]} 기준 그림 (${c.variantOf}/${baseOf.base.face}.webp)`,
+      file: `assets/chars/${c.id}/${c.base.face}.webp`,
+      build: () => `${P.outfitLock}\n${c.outfit}.\nExpression and pose: ${c.base.text}.\n\nCharacter (for reference): ${c.desc}.\nStyle: ${style}`
+    } : {
+      key: `c-${c.id}-${c.base.face}`, title: `${c.name.split(' ')[0]} · 기준 그림`, ko: c.base.ko, kind: '새로 그리기',
       file: `assets/chars/${c.id}/${c.base.face}.webp`,
       build: () => `${style}\n\n${P.spriteFrame}\n\nCharacter: ${c.desc}.\nExpression and pose: ${c.base.text}.` });
     c.faces.forEach(f => add(g, { key: `c-${c.id}-${f.face}`, title: `${c.name.split(' ')[0]} · ${f.ko.split(':')[0]}`, ko: f.ko, kind: '고쳐 그리기',
-      ref: `${c.name.split(' ')[0]} 기준 그림 (${c.base.face}.webp)`,
+      ref: `${c.name.split(' ')[0]} ${c.variantOf ? '옷 바꾼 ' : ''}기준 그림 (${c.id}/${c.base.face}.webp)`,
       file: `assets/chars/${c.id}/${f.face}.webp`,
       build: () => `${P.editLock}\n${f.text}.\n\nCharacter (for reference): ${c.desc}.\nStyle: ${style}` }));
   });
 
   /* 배경 */
   P.backgrounds.forEach(b => add($('#bg-list'), {
-    key: `b-${b.id}`, title: b.id, ko: b.ko,
+    key: `b-${b.id}`, title: b.id, ko: `${b.ko} · ${b.ep}`,
     kind: b.from ? '고쳐 그리기' : '새로 그리기',
     ref: b.from ? `${b.from}.webp` : b.ref,
     file: `assets/bg/${b.id}.webp`,
@@ -186,7 +193,7 @@
 
   /* CG */
   P.cgs.forEach(c => add($('#cg-list'), {
-    key: `g-${c.id}`, title: c.id, ko: c.ko, kind: '새로 그리기', ref: c.ref,
+    key: `g-${c.id}`, title: c.id, ko: `${c.ko} · ${c.ep}`, kind: '새로 그리기', ref: c.ref,
     file: `assets/cg/${c.id}.webp`,
     build: () => `${style}\n\nScene: ${c.text}.`
   }));

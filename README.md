@@ -2,7 +2,8 @@
 
 초등 1학년부터 중학생까지, 현실에서 누구에게나 생길 수 있는 어려운 상황을 이야기 게임으로 겪어 보며 **문제 해결 능력**을 키우는 웹 게임입니다. 외워서 맞히는 정답은 없습니다.
 
-- 에피소드 1: **열나는 밤, 지갑엔 3천 원** (엔딩 6가지)
+- 에피소드 1: **열나는 밤, 지갑엔 3천 원** (추천 초등 4학년 이상, 엔딩 6가지)
+- 에피소드 2: **엄마가 안 보여요** (추천 초등 1~3학년, 엔딩 5가지)
 - 나이 선택: 초등 1~3학년 / 초등 4~6학년 / 중학생
 - 실행: `index.html`을 브라우저로 열면 됩니다. 빌드나 설치가 필요 없습니다.
 
@@ -24,10 +25,11 @@ assets/manifest.js       진짜 일러스트 등록부
 js/art.js                임시 그림 (배경, 배경 차분, 캐릭터 표정)
 js/engine.js             이야기 엔진: 레이어 무대, 대본 지시어, 게이지, 단서 카드, 엔딩 회고
 scenarios/fever-night.js 에피소드 1
+scenarios/lost-mart.js   에피소드 2
 scenarios/catalog.js     처음 화면의 이야기 지도
 tools/prompts.html       이미지 생성 문장 모음 (데이터: tools/prompts-data.js)
 tools/compose.html       장면 합성 미리보기
 docs/                    설계 문서
 ```
 
-새 에피소드는 `scenarios/`에 같은 형식의 파일을 추가하면 됩니다. 대본 형식과 지시어(`@bg`, `@show`, `@face`, `@cg` …)는 `docs/ART_PIPELINE.md` 6장에 있습니다.
+새 에피소드는 `scenarios/`에 같은 형식의 파일을 만들고 `index.html`에 `<script>` 한 줄을 추가하면 처음 화면에 나타납니다. 게이지 종류(`gauges`)와 가능한 학년(`ages`)은 에피소드마다 정합니다. 대본 형식과 지시어(`@bg`, `@show`, `@face`, `@cg` …)는 `docs/ART_PIPELINE.md` 6장에 있습니다.

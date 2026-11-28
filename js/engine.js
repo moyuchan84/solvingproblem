@@ -1,9 +1,11 @@
 /* 그럴 땐 어떻게 — 이야기 엔진
- * 에피소드 데이터(window.EPISODE)를 읽어 장면, 대사, 선택지, 게이지, 단서 카드, 엔딩 회고를 그린다.
+ * 에피소드 데이터(window.EPISODES 목록)를 읽어 장면, 대사, 선택지, 게이지, 단서 카드, 엔딩 회고를 그린다.
+ * 에피소드마다 게이지 종류(EP.gauges)와 시작값(EP.start)을 스스로 정한다.
  */
 (function () {
   const $ = s => document.querySelector(s);
-  const EP = window.EPISODE;
+  const EPISODES = window.EPISODES || [];
+  let EP = EPISODES[0];
   const STEPS = ['살피기', '알아보기', '떠올리기', '해보기', '돌아보기'];
   const AGES = { low: '초등 1~3학년', mid: '초등 4~6학년', teen: '중학생' };
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -12,15 +14,17 @@
 
   /* ---------- 저장(이 브라우저에서 찾은 엔딩만) ---------- */
   const store = {
-    get() { try { return JSON.parse(localStorage.getItem('gdh.endings') || '[]'); } catch (e) { return []; } },
-    add(t) { try { const a = store.get(); if (!a.includes(t)) { a.push(t); localStorage.setItem('gdh.endings', JSON.stringify(a)); } } catch (e) {} }
+    key: ep => 'gdh.endings.' + (ep || EP).id,
+    get(ep) { try { return JSON.parse(localStorage.getItem(store.key(ep)) || '[]'); } catch (e) { return []; } },
+    add(t) { try { const a = store.get(); if (!a.includes(t)) { a.push(t); localStorage.setItem(store.key(), JSON.stringify(a)); } } catch (e) {} }
   };
 
   /* ---------- 상태 ---------- */
   const won = n => n.toLocaleString('ko-KR') + '원';
   function newState(age) {
     const st = EP.start;
-    const s = { age, money: st.money, min: 0, cond: st.cond, worry: st.worry, cards: new Set(), done: new Set(), flags: {}, seenCards: 0 };
+    const s = { age, min: 0, cards: new Set(), done: new Set(), flags: {} };
+    EP.gauges.forEach(g => { if (g.key !== 'clock') s[g.key] = st[g.key] ?? 0; });
     s.won = won;
     s.clock = () => { const t = (st.clock + s.min) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
     s.apply = fx => apply(fx);
@@ -32,13 +36,11 @@
   function apply(fx) {
     if (typeof fx === 'function') fx = fx(S);
     if (!fx) return;
-    if (fx.money) S.money = Math.max(0, S.money + fx.money);
-    if (fx.min) {
-      S.min += fx.min;
-      if (!S.cards.has('care')) S.cond = clamp(S.cond - Math.round(fx.min / 10));
-    }
-    if (fx.cond) S.cond = clamp(S.cond + fx.cond);
-    if (fx.worry) S.worry = clamp(S.worry + fx.worry);
+    if (fx.min) { S.min += fx.min; if (EP.onTime) EP.onTime(S, fx.min); }
+    EP.gauges.forEach(g => {
+      if (g.key === 'clock' || !fx[g.key]) return;
+      S[g.key] = g.type === 'won' ? Math.max(0, S[g.key] + fx[g.key]) : clamp(S[g.key] + fx[g.key]);
+    });
     if (fx.flags) Object.assign(S.flags, fx.flags);
     (fx.cards || []).forEach(k => {
       const c = EP.cards[k];
@@ -51,11 +53,17 @@
   }
 
   /* ---------- HUD ---------- */
+  function buildHud() {
+    $('#gauges').innerHTML = EP.gauges.map(g => g.type === 'bar'
+      ? `<div class="g bar"><dt>${g.label}</dt><dd><span id="g-${g.key}" class="meter ${g.tone || 'good'}" role="meter" aria-label="${g.label}" aria-valuemin="0" aria-valuemax="100"></span></dd></div>`
+      : `<div class="g"><dt>${g.label}</dt><dd id="g-${g.key}" class="num"></dd></div>`).join('');
+    $('#gauges').style.setProperty('--cols', EP.gauges.map(g => (g.type === 'bar' ? '1fr' : 'auto')).join(' '));
+  }
   function hud() {
-    $('#g-clock').textContent = S.clock();
-    $('#g-money').textContent = won(S.money);
-    setBar('#g-cond', S.cond);
-    setBar('#g-worry', S.worry);
+    EP.gauges.forEach(g => {
+      if (g.type === 'bar') setBar('#g-' + g.key, S[g.key]);
+      else $('#g-' + g.key).textContent = g.key === 'clock' ? S.clock() : g.type === 'won' ? won(S[g.key]) : S[g.key];
+    });
     $('#cards-count').textContent = S.cards.size;
   }
   function setBar(sel, v) {
@@ -291,7 +299,9 @@
     $('#end-missed').innerHTML = missed.length ? missed.join('') : '<li>모든 단서를 찾아냈어요!</li>';
     $('#end-missed-wrap').querySelector('h3').textContent = missed.length ? `이런 방법도 있었어요 (${missed.length})` : '이런 방법도 있었어요';
     $('#end-q').innerHTML = (EP.questions[S.age] || []).map(q => `<li>${q}</li>`).join('');
-    $('#end-stats').textContent = `걸린 시간 ${S.min >= 60 ? Math.floor(S.min / 60) + '시간 ' : ''}${S.min % 60 ? (S.min % 60) + '분' : ''} · 남은 돈 ${won(S.money)} · 알게 된 것 ${S.cards.size}개`;
+    const t = `${S.min >= 60 ? Math.floor(S.min / 60) + '시간 ' : ''}${S.min % 60 ? (S.min % 60) + '분' : ''}`.trim() || '0분';
+    const money = EP.gauges.some(g => g.key === 'money') ? ` · 남은 돈 ${won(S.money)}` : '';
+    $('#end-stats').textContent = `걸린 시간 ${t}${money} · 알게 된 것 ${S.cards.size}개`;
     $('#end-count').textContent = `이 기기에서 찾은 엔딩 ${Math.min(store.get().length, EP.endingCount)} / ${EP.endingCount}`;
     $('#toast').hidden = true;
     $('#ending').hidden = false;
@@ -323,18 +333,45 @@
     $('#title').hidden = true;
     $('#ending').hidden = true;
     $('#age-chip').textContent = AGES[age];
+    buildHud();
     hud();
     goto(EP.start.node);
   }
 
-  function boot() {
-    $('#ep-title').textContent = EP.title;
-    $('#ep-blurb').textContent = EP.blurb;
-    const ta = EP.titleArt || { bg: 'room_sick', cast: [['me', 'worry', 'right']] };
+  /* 처음 화면: 에피소드 고르기 → 학년 고르기 */
+  function pickEpisode(ep) {
+    EP = ep;
+    try { localStorage.setItem('gdh.lastEp', ep.id); } catch (e) {}
+    document.querySelectorAll('.ep-card').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.ep === ep.id)));
+    const ta = EP.titleArt || { bg: 'room_sick', cast: [] };
     $('#title-art').innerHTML = `<img class="bg in" alt="" src="${ART.bg(ta.bg)}">` +
       ta.cast.map(([id, face, pos]) => `<div class="sprite in" style="left:${POS[pos] ?? 50}%"><img alt="" src="${ART.sprite(id, face)}"></div>`).join('');
-    const found = store.get().length;
-    $('#title-count').textContent = found ? `찾은 엔딩 ${Math.min(found, EP.endingCount)} / ${EP.endingCount}` : `엔딩 ${EP.endingCount}가지`;
+    document.querySelectorAll('[data-age]').forEach(b => {
+      const off = EP.ages && !EP.ages.includes(b.dataset.age);
+      b.disabled = !!off;
+      b.querySelector('span').textContent = off ? '이 이야기는 아직 준비 중' : b.dataset.note;
+    });
+    $('#pick-age').textContent = `「${EP.title}」 몇 학년이에요?`;
+  }
+  function renderEpisodes() {
+    $('#episodes').innerHTML = EPISODES.map((ep, i) => {
+      const found = store.get(ep).length;
+      return `<button type="button" class="ep-card" data-ep="${ep.id}" aria-pressed="false">
+        <span class="ep-no">에피소드 ${i + 1} · 추천 ${ep.recommend || '전 학년'}</span>
+        <b>${ep.title}</b>
+        <span class="ep-blurb">${ep.blurb}</span>
+        <span class="count">${found ? `찾은 엔딩 ${Math.min(found, ep.endingCount)} / ${ep.endingCount}` : `엔딩 ${ep.endingCount}가지`}</span>
+      </button>`;
+    }).join('');
+    document.querySelectorAll('.ep-card').forEach(c => c.addEventListener('click', () => pickEpisode(EPISODES.find(e => e.id === c.dataset.ep))));
+    let last = null;
+    try { last = localStorage.getItem('gdh.lastEp'); } catch (e) {}
+    pickEpisode(EPISODES.find(e => e.id === last) || EP);
+  }
+
+  function boot() {
+    document.querySelectorAll('[data-age]').forEach(b => { b.dataset.note = b.querySelector('span').textContent; });
+    renderEpisodes();
     if (window.CATALOG) {
       $('#roadmap').innerHTML = CATALOG.map(g => `<section><h3>${g.age}</h3><ul>${g.items.map(i => `<li class="${i.ready ? 'ready' : ''}">${i.t}<span>${i.ready ? '플레이 가능' : '준비 중'}</span></li>`).join('')}</ul></section>`).join('');
     }
@@ -353,8 +390,7 @@
     $('#home-btn').addEventListener('click', () => boot.title());
   }
   boot.title = () => {
-    const found = store.get().length;
-    $('#title-count').textContent = found ? `찾은 엔딩 ${Math.min(found, EP.endingCount)} / ${EP.endingCount}` : `엔딩 ${EP.endingCount}가지`;
+    renderEpisodes();
     $('#title').hidden = false;
   };
 

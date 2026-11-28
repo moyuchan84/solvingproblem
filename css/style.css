@@ -142,12 +142,17 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
 
 /* 처음 화면 */
 .title { background: var(--bg); }
-.title-card { max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start; padding-top: 4vh; }
-@media (min-width: 641px) { .title-art.stage-like { position: sticky; top: 16px; } }
-.title-art { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 10; background: var(--stage); box-shadow: var(--shadow); }
+/* 위에서부터: 제목 → 고른 이야기의 그림(크게) → ① 이야기 ② 학년(넓은 화면에선 나란히) */
+.title-card { max-width: 1040px; margin: 0 auto; display: grid; gap: 16px; padding-top: 2vh; }
+.title-head { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 8px 28px; }
+.title h1 { font-size: clamp(36px, 6vw, 60px); line-height: 1.05; letter-spacing: -.01em; }
+.lede { font-size: 17px; color: var(--muted); max-width: 44ch; margin: 0 0 4px; justify-self: end; }
+.title-art { position: relative; width: 100%; border-radius: 18px; overflow: hidden; aspect-ratio: 16 / 9; max-height: 46vh; background: var(--stage); box-shadow: var(--shadow); }
 .title-body { min-width: 0; }
-.title h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: -.01em; }
-.lede { font-size: 17px; color: var(--muted); max-width: 40ch; margin: 10px 0 16px; }
+.title-steps { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px 24px; align-items: start; }
+.step { min-width: 0; }
+.pick[data-step]::before { content: attr(data-step); display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: 8px; border-radius: 50%; background: var(--lamp); color: #1B2340; font-size: 15px; vertical-align: 2px; }
+.start-note { margin: 8px 0 0; }
 .episode { border-left: 4px solid var(--lamp); padding: 4px 0 4px 12px; margin-bottom: 18px; }
 .episode h2 { font-size: 22px; }
 .episode p { margin: 2px 0 0; }
@@ -219,7 +224,10 @@ h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; 
 @media (max-width: 640px) {
   .gauges { grid-template-columns: 1fr 1fr; }
   .choices { grid-template-columns: 1fr; }
-  .title-card { grid-template-columns: 1fr; gap: 14px; }
+  .title-card { gap: 12px; padding-top: 0; }
+  .title-head, .title-steps { grid-template-columns: 1fr; }
+  .lede { justify-self: start; font-size: 16px; }
+  .title-art { max-height: none; }
   #line { font-size: 17px; }
   #phone { width: 52%; border-width: 4px; border-radius: 16px; }
   .sprite { bottom: -10%; }

@@ -50,18 +50,29 @@
 <!-- 처음 화면 -->
 <section id="title" class="overlay title" aria-labelledby="game-name">
   <div class="title-card">
+    <header class="title-head">
+      <div>
+        <p class="eyebrow">문제 해결 이야기 게임</p>
+        <h1 id="game-name">그럴 땐 어떻게?</h1>
+      </div>
+      <p class="lede">외워서 맞히는 정답은 없어요. 살피고, 알아보고, 물어보고, 해 보면서 나만의 길을 찾는 게임이에요.</p>
+    </header>
     <div id="title-art" class="title-art stage-like"></div>
     <div class="title-body">
-      <p class="eyebrow">문제 해결 이야기 게임</p>
-      <h1 id="game-name">그럴 땐 어떻게?</h1>
-      <p class="lede">외워서 맞히는 정답은 없어요. 살피고, 알아보고, 물어보고, 해 보면서 나만의 길을 찾는 게임이에요.</p>
-      <p class="pick">어떤 이야기를 해 볼까요?</p>
-      <div id="episodes" class="episodes"></div>
-      <p class="pick" id="pick-age">몇 학년이에요?</p>
-      <div class="ages">
-        <button type="button" id="age-low" data-age="low"><b>초등 1~3학년</b><span>힌트를 많이 줘요</span></button>
-        <button type="button" id="age-mid" data-age="mid"><b>초등 4~6학년</b><span>검색하고 비교해요</span></button>
-        <button type="button" id="age-teen" data-age="teen"><b>중학생</b><span>힌트 없이, 더 많은 선택</span></button>
+      <div class="title-steps">
+        <div class="step">
+          <p class="pick" data-step="1">어떤 이야기를 해 볼까요?</p>
+          <div id="episodes" class="episodes"></div>
+        </div>
+        <div class="step">
+          <p class="pick" data-step="2" id="pick-age">몇 학년이에요?</p>
+          <div class="ages">
+            <button type="button" id="age-low" data-age="low"><b>초등 1~3학년</b><span>힌트를 많이 줘요</span></button>
+            <button type="button" id="age-mid" data-age="mid"><b>초등 4~6학년</b><span>검색하고 비교해요</span></button>
+            <button type="button" id="age-teen" data-age="teen"><b>중학생</b><span>힌트 없이, 더 많은 선택</span></button>
+          </div>
+          <p class="count start-note">학년을 누르면 바로 시작해요.</p>
+        </div>
       </div>
       <details class="roadmap">
         <summary>이야기 지도: 나이별로 준비 중인 이야기</summary>

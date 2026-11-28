@@ -50,6 +50,10 @@
   </aside>
 </div>
 <script src="../assets/manifest.js"></script>
+<script>
+  /* manifest 경로는 게임 첫 화면(index.html) 기준이라, tools/ 안에서는 한 단계 위로 올린다 */
+  (function up(o) { for (const k in o) o[k] = typeof o[k] === 'string' ? '../' + o[k] : (up(o[k]), o[k]); })(window.ASSET_MANIFEST || {});
+</script>
 <script src="../js/art.js"></script>
 <script>
 (function () {
